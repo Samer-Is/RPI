@@ -421,25 +421,48 @@ with st.spinner("Calculating optimal prices for all categories..."):
             
             pricing_results[category] = result
             
-            # Get competitor pricing for this category
-            # Debug: Check what we're passing
-            if st.session_state.competitor_prices is not None:
-                comp_stats = calculate_average_competitor_price(
-                    st.session_state.competitor_prices,
-                    category,
-                    branch_info['city'],
-                    st.session_state.selected_branch,
-                    pricing_date
+            # Get LIVE competitor pricing for this category
+            try:
+                comp_stats_live = get_competitor_prices_for_dashboard(
+                    category=category,
+                    branch_name=branch_info['name'],
+                    date=pricing_date,
+                    is_holiday=is_holiday,
+                    is_ramadan=is_ramadan,
+                    is_umrah_season=is_umrah_season,
+                    is_hajj=is_hajj,
+                    is_festival=is_festival,
+                    is_sports_event=is_sports_event,
+                    is_conference=is_conference,
+                    is_weekend=is_weekend,
+                    is_vacation=is_vacation
                 )
-            else:
-                # No competitor data loaded
+                
+                # Convert to expected format
                 comp_stats = {
-                    'avg_price': None,
-                    'min_price': None,
-                    'max_price': None,
-                    'competitor_count': 0,
-                    'competitors': []
+                    'avg_price': comp_stats_live['avg_price'],
+                    'competitors': comp_stats_live['competitors'],
+                    'competitor_count': comp_stats_live['competitor_count'],
                 }
+            except Exception as e:
+                st.error(f"Live pricing error: {str(e)}")
+                # Fallback to static data
+                if st.session_state.competitor_prices is not None:
+                    comp_stats = calculate_average_competitor_price(
+                        st.session_state.competitor_prices,
+                        category,
+                        branch_info['city'],
+                        st.session_state.selected_branch,
+                        pricing_date
+                    )
+                else:
+                    comp_stats = {
+                        'avg_price': None,
+                        'min_price': None,
+                        'max_price': None,
+                        'competitor_count': 0,
+                        'competitors': []
+                    }
             
             comparison = compare_live(result['final_price'], comp_stats)
             competitor_data[category] = {
