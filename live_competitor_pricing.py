@@ -96,7 +96,9 @@ class LiveCompetitorPricing:
         Returns dict with competitor prices and metadata
         """
         # Check cache first (5 min TTL for demo, would be real-time in production)
-        cache_key = f"{category}_{branch_name}_{date.date()}"
+        # Handle both datetime.date and datetime.datetime objects
+        date_str = date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else str(date)
+        cache_key = f"{category}_{branch_name}_{date_str}"
         cached = self._get_cache(cache_key, ttl_seconds=300)
         if cached:
             return cached
