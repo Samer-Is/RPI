@@ -42,6 +42,16 @@ st.markdown("""
         margin-top: 0.5rem;
         margin-bottom: 1rem;
     }
+    /* Logo styling with rounded corners and 3D effect */
+    img {
+        border-radius: 20px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    img:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.2);
+    }
     .price-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
