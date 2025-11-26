@@ -19,7 +19,8 @@ from pathlib import Path
 
 from pricing_engine import DynamicPricingEngine
 import config
-from competitor_pricing import load_competitor_prices, calculate_average_competitor_price, compare_with_competitors
+from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
+from live_competitor_pricing import get_competitor_prices_for_dashboard, compare_with_competitors as compare_live, compare_with_competitors
 from utilization_query import get_current_utilization
 
 # Page configuration
@@ -440,7 +441,7 @@ with st.spinner("Calculating optimal prices for all categories..."):
                     'competitors': []
                 }
             
-            comparison = compare_with_competitors(result['final_price'], comp_stats)
+            comparison = compare_live(result['final_price'], comp_stats)
             competitor_data[category] = {
                 'stats': comp_stats,
                 'comparison': comparison
