@@ -223,8 +223,16 @@ class BookingComCarRentalAPI:
                 }
                 continue
             
-            # Get top 5 competitors by price
-            sorted_prices = sorted(prices, key=lambda x: x['per_day'])[:5]
+            # Remove duplicates (same supplier + same price)
+            # Keep one representative vehicle per supplier-price combination
+            unique_prices = {}
+            for p in prices:
+                key = (p['supplier'], p['per_day'])
+                if key not in unique_prices:
+                    unique_prices[key] = p
+            
+            # Get top 5 unique competitors by price
+            sorted_unique = sorted(unique_prices.values(), key=lambda x: x['per_day'])[:5]
             
             competitors = [
                 {
@@ -233,10 +241,10 @@ class BookingComCarRentalAPI:
                     "Date": date_str,
                     "Vehicle": p['vehicle']
                 }
-                for p in sorted_prices
+                for p in sorted_unique
             ]
             
-            avg_price = sum(p['per_day'] for p in sorted_prices) / len(sorted_prices)
+            avg_price = sum(p['per_day'] for p in sorted_unique) / len(sorted_unique)
             
             dashboard_data[category] = {
                 "avg_price": round(avg_price, 2),
