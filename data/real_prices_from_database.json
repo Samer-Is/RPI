@@ -1,0 +1,45 @@
+{
+  "extraction_date": "2025-11-30T11:26:01.055553",
+  "total_contracts": 2464543,
+  "overall_stats": {
+    "mean": 220.593225,
+    "median": 190.0,
+    "p25": 175.0,
+    "p75": 210.0,
+    "p90": 290.0
+  },
+  "weekend_analysis": [
+    {
+      "DayType": "Weekend",
+      "Contracts": 474176,
+      "AvgPrice": 225.25
+    },
+    {
+      "DayType": "Weekday",
+      "Contracts": 1182782,
+      "AvgPrice": 214.71
+    }
+  ],
+  "hard_coded_prices": {
+    "Economy": 150,
+    "Compact": 180,
+    "Standard": 220,
+    "SUV Compact": 280,
+    "SUV Standard": 350,
+    "SUV Large": 500,
+    "Luxury Sedan": 600,
+    "Luxury SUV": 800
+  },
+  "recommended_prices": {
+    "Economy": 175.0,
+    "Compact": 182.5,
+    "Standard": 190.0,
+    "SUV Compact": 200.0,
+    "SUV Standard": 210.0,
+    "SUV Large": 250.0,
+    "Luxury Sedan": 290.0,
+    "Luxury SUV": 348.0
+  },
+  "location_premium": -7.830853563038376,
+  "weekend_premium": 4.908946951702298
+}

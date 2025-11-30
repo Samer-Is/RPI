@@ -1,0 +1,12 @@
+Date,Competitor,Location,Category,ActualPrice,Source,Notes
+# TEMPLATE: Fill this with REAL competitor prices from their websites
+# Example: 2025-11-30,Hertz,Riyadh Airport,Economy,145,Website,7 days out 1-day rental
+# 
+# INSTRUCTIONS:
+# 1. Go to competitor websites (Hertz.com.sa, Budget.com.sa, Thrifty.com.sa)
+# 2. Search for: Riyadh Airport, 7 days from today, 1-day rental
+# 3. Record the DAILY RATE for each category
+# 4. Add rows below with actual prices
+#
+# Once you fill this, the system will use REAL prices instead of simulations
+

@@ -1,35 +1,35 @@
 {
-  "cached_at": "2025-11-27T16:32:59.405992",
+  "cached_at": "2025-11-30T11:12:54.154358",
   "data": {
     "competitors": [
       {
         "Competitor_Name": "Hertz",
-        "Competitor_Price": 250,
+        "Competitor_Price": 240,
         "Competitor_Category": "Standard/Midsize",
-        "Date": "2025-11-27 16:32",
+        "Date": "2025-11-30 11:12",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Budget",
-        "Competitor_Price": 230,
+        "Competitor_Price": 245,
         "Competitor_Category": "Standard/Midsize",
-        "Date": "2025-11-27 16:32",
+        "Date": "2025-11-30 11:12",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Thrifty",
-        "Competitor_Price": 250,
+        "Competitor_Price": 235,
         "Competitor_Category": "Standard/Midsize",
-        "Date": "2025-11-27 16:32",
+        "Date": "2025-11-30 11:12",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       }
     ],
-    "avg_price": 243.33333333333334,
+    "avg_price": 240.0,
     "competitor_count": 3,
-    "last_updated": "2025-11-27T16:32:59.405992",
+    "last_updated": "2025-11-30T11:12:54.154358",
     "location": "King Khalid Airport - Riyadh",
     "category": "Standard",
     "is_live": true

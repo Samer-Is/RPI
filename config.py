@@ -149,7 +149,7 @@ VALIDATION_SIZE = 0.1
 #   - Result: Demand leads, utilization modulates based on context
 #   - Good for: Aligning with Emirates/Booking.com/Hertz industry standards
 #
-PRICING_MODE = "hierarchical"  # Options: "multiplicative" or "hierarchical"
+PRICING_MODE = "multiplicative"  # Options: "multiplicative" or "hierarchical"
 
 # Hierarchical Mode Parameters (only used when PRICING_MODE = "hierarchical")
 HIERARCHICAL_CONFIG = {
