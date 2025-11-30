@@ -20,7 +20,7 @@ from pathlib import Path
 from pricing_engine import DynamicPricingEngine
 import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
-from live_competitor_pricing import get_competitor_prices_for_dashboard, compare_with_competitors as compare_live, compare_with_competitors
+from booking_com_api import get_api_instance
 from utilization_query import get_current_utilization
 
 # Page configuration
@@ -409,29 +409,36 @@ with st.spinner("Calculating optimal prices for all categories..."):
             
             pricing_results[category] = result
             
-            # Get LIVE competitor pricing for this category
+            # Get LIVE competitor pricing for this category from Booking.com API
             try:
-                comp_stats_live = get_competitor_prices_for_dashboard(
-                    category=category,
+                api = get_api_instance()
+                pick_up_date = datetime.combine(pricing_date, datetime.min.time())
+                
+                # Get all categories for this branch (API call is cached internally)
+                all_competitor_data = api.get_competitor_prices_for_dashboard(
                     branch_name=branch_info['name'],
-                    date=pricing_date,
-                    is_holiday=is_holiday,
-                    is_ramadan=is_ramadan,
-                    is_umrah_season=is_umrah_season,
-                    is_hajj=is_hajj,
-                    is_festival=is_festival,
-                    is_sports_event=is_sports_event,
-                    is_conference=is_conference,
-                    is_weekend=is_weekend,
-                    is_vacation=is_school_vacation
+                    date=pick_up_date
                 )
                 
-                # Convert to expected format
-                comp_stats = {
-                    'avg_price': comp_stats_live['avg_price'],
-                    'competitors': comp_stats_live['competitors'],
-                    'competitor_count': comp_stats_live['competitor_count'],
-                }
+                # Extract data for this specific category
+                if category in all_competitor_data:
+                    category_data = all_competitor_data[category]
+                    competitor_prices = [c['Competitor_Price'] for c in category_data['competitors']] if category_data['competitors'] else []
+                    comp_stats = {
+                        'avg_price': category_data['avg_price'],
+                        'min_price': min(competitor_prices) if competitor_prices else None,
+                        'max_price': max(competitor_prices) if competitor_prices else None,
+                        'competitors': category_data['competitors'],
+                        'competitor_count': len(category_data['competitors']),
+                    }
+                else:
+                    comp_stats = {
+                        'avg_price': None,
+                        'min_price': None,
+                        'max_price': None,
+                        'competitors': [],
+                        'competitor_count': 0,
+                    }
             except Exception as e:
                 st.error(f"Live pricing error: {str(e)}")
                 # Fallback to static data
@@ -452,7 +459,17 @@ with st.spinner("Calculating optimal prices for all categories..."):
                         'competitors': []
                     }
             
-            comparison = compare_live(result['final_price'], comp_stats)
+            # Compare with competitors
+            if comp_stats['avg_price']:
+                price_diff = result['final_price'] - comp_stats['avg_price']
+                price_diff_pct = (price_diff / comp_stats['avg_price']) * 100
+                comparison = {
+                    'diff': price_diff,
+                    'diff_pct': price_diff_pct,
+                    'status': 'cheaper' if price_diff < 0 else 'more_expensive'
+                }
+            else:
+                comparison = {'diff': 0, 'diff_pct': 0, 'status': 'no_data'}
             competitor_data[category] = {
                 'stats': comp_stats,
                 'comparison': comparison
