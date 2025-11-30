@@ -1,5 +1,5 @@
 {
-  "scrape_timestamp": "2025-11-30T17:13:03.335027",
+  "scrape_timestamp": "2025-11-30T17:26:26.640391",
   "scrape_date": "2025-12-01",
   "branches": {
     "King Khalid Airport - Riyadh": {
@@ -10,19 +10,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 113.25,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 136.84,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 158.35,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             }
           ]
@@ -33,19 +33,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 125.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 152.04,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 165.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -56,37 +56,43 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 160.09,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Changan Eado"
             },
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 164.18,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Changan Eado"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 211.15,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 140.6,
+          "avg_price": 179.29,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 138.82,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             },
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 142.38,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 256.68,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             }
           ]
         },
@@ -96,7 +102,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 573.97,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -107,7 +113,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1091.41,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Highlander"
             }
           ]
@@ -118,13 +124,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 609.24,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chrysler 300C"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1692.84,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "BMW 5 Series"
             }
           ]
@@ -134,7 +140,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:04.249739"
+      "last_updated": "2025-11-30T17:26:27.604107"
     },
     "Olaya District - Riyadh": {
       "categories": {
@@ -144,19 +150,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 113.25,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 136.84,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 158.35,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             }
           ]
@@ -167,19 +173,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 125.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 152.04,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 165.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -190,37 +196,43 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 160.09,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Changan Eado"
             },
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 164.18,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Changan Eado"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 211.15,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 140.6,
+          "avg_price": 179.29,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 138.82,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             },
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 142.38,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 256.68,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             }
           ]
         },
@@ -230,7 +242,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 573.97,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -241,7 +253,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1091.41,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Highlander"
             }
           ]
@@ -252,13 +264,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 609.24,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chrysler 300C"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1692.84,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "BMW 5 Series"
             }
           ]
@@ -268,7 +280,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:05.163637"
+      "last_updated": "2025-11-30T17:26:28.534550"
     },
     "King Abdulaziz Airport - Jeddah": {
       "categories": {
@@ -278,13 +290,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 87.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 158.35,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             }
           ]
@@ -295,13 +307,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 122.9,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 165.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -312,25 +324,31 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 188.21,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 221.71,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 161.57,
+          "avg_price": 261.36,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 161.57,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 361.15,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             }
           ]
         },
@@ -340,7 +358,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 546.64,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -351,7 +369,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1127.48,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Tahoe"
             }
           ]
@@ -362,7 +380,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 727.5,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Audi A4"
             }
           ]
@@ -372,7 +390,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:05.751862"
+      "last_updated": "2025-11-30T17:26:29.278216"
     },
     "Jeddah City Center": {
       "categories": {
@@ -382,13 +400,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 87.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 158.35,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             }
           ]
@@ -399,13 +417,13 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 122.9,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 165.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -416,25 +434,31 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 188.21,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 221.71,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 161.57,
+          "avg_price": 261.36,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 161.57,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 361.15,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             }
           ]
         },
@@ -444,7 +468,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 546.64,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -455,7 +479,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1127.48,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Tahoe"
             }
           ]
@@ -466,7 +490,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 727.5,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Audi A4"
             }
           ]
@@ -476,7 +500,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:06.424599"
+      "last_updated": "2025-11-30T17:26:30.257714"
     },
     "King Fahd Airport - Dammam": {
       "categories": {
@@ -486,19 +510,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 89.38,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 106.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 121.17,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             }
           ]
@@ -509,19 +533,19 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 99.3,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 118.02,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 125.31,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -532,37 +556,43 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 156.31,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 169.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 201.09,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 126.83,
+          "avg_price": 178.88,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 125.22,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             },
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 128.45,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 282.97,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             }
           ]
         },
@@ -572,7 +602,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 520.61,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -583,7 +613,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1039.41,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Highlander"
             }
           ]
@@ -594,7 +624,7 @@
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 763.85,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Audi A4"
             }
           ]
@@ -604,7 +634,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:07.509596"
+      "last_updated": "2025-11-30T17:26:31.274974"
     },
     "Al Khobar Business District": {
       "categories": {
@@ -614,25 +644,25 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 106.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Avis",
               "Competitor_Price": 106.39,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Ford Figo"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 121.17,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai i10"
             },
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 495.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Hiace"
             }
           ]
@@ -643,25 +673,25 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 118.02,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 123.8,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Avis",
               "Competitor_Price": 124.96,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Accent"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 125.31,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Kia Pegas"
             }
           ]
@@ -672,48 +702,54 @@
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 169.19,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 169.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 201.09,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Corolla  "
             },
             {
               "Competitor_Name": "Avis",
               "Competitor_Price": 217.72,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Altima"
             }
           ]
         },
         "SUV Compact": {
-          "avg_price": 223.99,
+          "avg_price": 238.74,
           "competitors": [
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 125.22,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             },
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 226.97,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Creta"
+            },
+            {
+              "Competitor_Name": "Sixt",
+              "Competitor_Price": 282.97,
+              "Date": "2025-12-01 17:26",
+              "Vehicle": "Hyundai Kona"
             },
             {
               "Competitor_Name": "Avis",
               "Competitor_Price": 319.79,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Tucson"
             }
           ]
@@ -724,13 +760,13 @@
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 301.24,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan X-Trail"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 520.61,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota RAV4  "
             }
           ]
@@ -741,13 +777,13 @@
             {
               "Competitor_Name": "Budget",
               "Competitor_Price": 631.37,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Toyota Land Cruiser Prado GPS"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 1510.91,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Tahoe"
             }
           ]
@@ -758,13 +794,13 @@
             {
               "Competitor_Name": "Avis",
               "Competitor_Price": 704.65,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Lexus ES350"
             },
             {
               "Competitor_Name": "Sixt",
               "Competitor_Price": 763.85,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Audi A4"
             }
           ]
@@ -774,7 +810,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:08.920270"
+      "last_updated": "2025-11-30T17:26:32.450161"
     },
     "Mecca City Center": {
       "categories": {
@@ -784,7 +820,7 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 120.8,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             }
           ]
@@ -795,7 +831,7 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 157.56,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             }
           ]
@@ -806,7 +842,7 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 188.21,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Hyundai Elantra  "
             }
           ]
@@ -817,7 +853,7 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 161.57,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             }
           ]
@@ -839,7 +875,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:09.492761"
+      "last_updated": "2025-11-30T17:26:33.062461"
     },
     "Medina Downtown": {
       "categories": {
@@ -849,13 +885,13 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 113.25,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 120.8,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chevrolet Spark"
             }
           ]
@@ -866,13 +902,13 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 125.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 151.0,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Nissan Sunny"
             }
           ]
@@ -883,13 +919,13 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 159.25,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Changan Eado"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 162.81,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Dodge Neon"
             }
           ]
@@ -900,13 +936,13 @@
             {
               "Competitor_Name": "Alamo",
               "Competitor_Price": 118.6,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             },
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 161.57,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "GAC GS3"
             }
           ]
@@ -925,7 +961,7 @@
             {
               "Competitor_Name": "Enterprise",
               "Competitor_Price": 609.24,
-              "Date": "2025-12-01 17:13",
+              "Date": "2025-12-01 17:26",
               "Vehicle": "Chrysler 300C"
             }
           ]
@@ -935,7 +971,7 @@
           "competitors": []
         }
       },
-      "last_updated": "2025-11-30T17:13:10.282107"
+      "last_updated": "2025-11-30T17:26:33.779067"
     }
   }
 }

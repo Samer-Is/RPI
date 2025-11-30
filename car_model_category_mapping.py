@@ -143,6 +143,12 @@ CAR_MODEL_MAPPING = {
         "seats": 5,
         "notes": "Subcompact SUV popular in Middle East"
     },
+    "Hyundai Kona": {
+        "renty_category": "SUV Compact",
+        "type": "Subcompact SUV/Crossover",
+        "seats": 5,
+        "notes": "Electric/hybrid subcompact SUV"
+    },
     "Nissan Qashqai": {
         "renty_category": "SUV Compact",
         "type": "Compact Crossover",

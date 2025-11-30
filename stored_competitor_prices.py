@@ -17,10 +17,19 @@ DATA_FILE = "data/competitor_prices/daily_competitor_prices.json"
 _cached_data = None
 _cache_timestamp = None
 
+def clear_cache():
+    """Clear the in-memory cache to force fresh data load"""
+    global _cached_data, _cache_timestamp
+    _cached_data = None
+    _cache_timestamp = None
+    logger.info("Competitor price cache cleared")
+
 def load_stored_data(force_reload=False) -> Optional[Dict]:
     """
     Load competitor price data from stored JSON file
     Uses in-memory cache to avoid repeated file reads
+    
+    Set force_reload=True to bypass cache and load fresh from file
     """
     global _cached_data, _cache_timestamp
     

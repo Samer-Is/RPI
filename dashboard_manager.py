@@ -20,7 +20,7 @@ from pathlib import Path
 from pricing_engine import DynamicPricingEngine
 import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
-from stored_competitor_prices import get_competitor_prices_for_branch_category, get_data_freshness
+from stored_competitor_prices import get_competitor_prices_for_branch_category, get_data_freshness, clear_cache
 from utilization_query import get_current_utilization
 
 # Page configuration
@@ -265,6 +265,11 @@ if data_freshness['available']:
         st.sidebar.error(f"❌ Competitor Data: {status} ({age_hours:.1f}h old)")
 else:
     st.sidebar.error("❌ No competitor data available. Run daily_competitor_scraper.py")
+
+# Refresh button to clear cache and reload fresh data
+if st.sidebar.button("🔄 Refresh Competitor Data"):
+    clear_cache()
+    st.rerun()
 
 # Main content - Header with Logo
 col1, col2, col3 = st.columns([1, 2, 1])
