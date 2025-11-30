@@ -14,11 +14,15 @@ from datetime import datetime, timedelta
 import time
 import json
 import re
+import os
+import pickle
 
 class SaudiCompetitorScraper:
     def __init__(self, headless=True):
         self.headless = headless
         self.driver = None
+        self.cache_dir = "data/cache/scraper"
+        os.makedirs(self.cache_dir, exist_ok=True)
         
         # Competitor websites in Saudi Arabia
         self.competitors = {
@@ -357,9 +361,47 @@ class SaudiCompetitorScraper:
         
         return any(keyword in vehicle_lower for keyword in keywords)
     
+    def _get_cache_key(self, branch_name, category):
+        """Generate cache key"""
+        return f"{branch_name}_{category}".replace(' ', '_').replace('-', '_')
+    
+    def _get_cached_prices(self, cache_key, ttl_minutes=30):
+        """Get cached prices if available and fresh"""
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.pkl")
+        
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, 'rb') as f:
+                    cached = pickle.load(f)
+                
+                cache_time = datetime.fromisoformat(cached['cached_at'])
+                age_minutes = (datetime.now() - cache_time).total_seconds() / 60
+                
+                if age_minutes < ttl_minutes:
+                    print(f"Using cached prices ({age_minutes:.1f} min old)")
+                    cached['data']['from_cache'] = True
+                    return cached['data']
+            except:
+                pass
+        
+        return None
+    
+    def _set_cached_prices(self, cache_key, data):
+        """Cache prices"""
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.pkl")
+        try:
+            cache_entry = {
+                'cached_at': datetime.now().isoformat(),
+                'data': data
+            }
+            with open(cache_file, 'wb') as f:
+                pickle.dump(cache_entry, f)
+        except Exception as e:
+            print(f"Cache error: {e}")
+    
     def get_live_prices(self, branch_name, category, date=None):
         """
-        Get live competitor prices from Saudi websites
+        Get live competitor prices from Saudi websites with caching
         
         Args:
             branch_name: Renty branch name
@@ -369,6 +411,12 @@ class SaudiCompetitorScraper:
         Returns:
             dict with competitor prices
         """
+        # Check cache first (30 min TTL)
+        cache_key = self._get_cache_key(branch_name, category)
+        cached = self._get_cached_prices(cache_key, ttl_minutes=30)
+        if cached:
+            return cached
+        
         if date is None:
             date = datetime.now() + timedelta(days=7)
         
@@ -383,7 +431,7 @@ class SaudiCompetitorScraper:
             print(f"Scraping competitors for {category} at {location}...")
             all_results = []
             
-            # Scrape each competitor (max 3 to avoid long waits)
+            # Scrape each competitor
             scraped_count = 0
             for name, url in list(self.competitors.items())[:3]:
                 if scraped_count >= 3:
@@ -447,7 +495,7 @@ class SaudiCompetitorScraper:
             
             avg_price = sum(r['Competitor_Price'] for r in matched_results) / len(matched_results)
             
-            return {
+            result = {
                 'competitors': matched_results,
                 'avg_price': avg_price,
                 'competitor_count': len(matched_results),
@@ -455,8 +503,13 @@ class SaudiCompetitorScraper:
                 'category': category,
                 'is_live': True,
                 'last_updated': datetime.now().isoformat(),
-                'data_source': 'SAUDI_COMPETITORS'
+                'data_source': 'WEB_SCRAPER'
             }
+            
+            # Cache result
+            self._set_cached_prices(cache_key, result)
+            
+            return result
             
         except Exception as e:
             print(f"Scraping error: {e}")
