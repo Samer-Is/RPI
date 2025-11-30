@@ -261,55 +261,41 @@ with col2:
 
 st.markdown("---")
 
-# Date and condition selectors
-st.markdown("### 📅 Date & Conditions")
+# Date and condition selectors - COMPACT
+col_date, col_events = st.columns([1, 3])
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
+with col_date:
+    st.markdown("**📅 Date**")
     pricing_date = st.date_input(
-        "Pricing Date",
-        value=date(2025, 11, 18),  # Latest date with actual data in database
+        "Date",
+        value=date(2025, 11, 18),
         min_value=date(2023, 1, 1),
-        max_value=date(2025, 11, 18),  # Latest available data
-        help="Select date for pricing analysis (Database has data up to Nov 18, 2025)"
+        max_value=date(2025, 11, 18),
+        help="Pricing date",
+        label_visibility="collapsed"
     )
+    is_weekend = st.checkbox("Weekend", value=False, help="Friday-Saturday")
 
-with col2:
-    is_weekend = st.checkbox("📅 Weekend", value=False, help="Friday-Saturday in KSA")
-
-with col3:
-    pass  # Spacer
-
-st.markdown("#### Religious Events")
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    is_holiday = st.checkbox("🎉 Holiday", value=False, help="Eid Al-Fitr, Eid Al-Adha, National Day, Founding Day")
-
-with col2:
-    is_ramadan = st.checkbox("🌙 Ramadan", value=False, help="Holy month of Ramadan (peak Umrah)")
-
-with col3:
-    is_umrah_season = st.checkbox("🕋 Umrah", value=False, help="Peak Umrah season (Rajab, Shaban, Shawwal)")
-
-with col4:
-    is_hajj = st.checkbox("🕌 Hajj", value=False, help="Hajj season (around Eid Al-Adha)")
-
-st.markdown("#### Other Events")
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    is_school_vacation = st.checkbox("🏖️ Vacation", value=False, help="School vacation periods (Summer, Mid-year)")
-
-with col2:
-    is_festival = st.checkbox("🎪 Festival", value=False, help="Riyadh Season, Jeddah Season")
-
-with col3:
-    is_sports_event = st.checkbox("🏎️ Sports", value=False, help="Formula 1 Saudi Arabian Grand Prix")
-
-with col4:
-    is_conference = st.checkbox("💼 Business", value=False, help="Major business conferences & exhibitions")
+with col_events:
+    st.markdown("**Religious:** 🎉 Holiday · 🌙 Ramadan · 🕋 Umrah · 🕌 Hajj  **|**  **Other:** 🏖️ Vacation · 🎪 Festival · 🏎️ Sports · 💼 Business")
+    col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+    
+    with col1:
+        is_holiday = st.checkbox("🎉", value=False, help="Eid, National Day", label_visibility="collapsed")
+    with col2:
+        is_ramadan = st.checkbox("🌙", value=False, help="Ramadan", label_visibility="collapsed")
+    with col3:
+        is_umrah_season = st.checkbox("🕋", value=False, help="Umrah season", label_visibility="collapsed")
+    with col4:
+        is_hajj = st.checkbox("🕌", value=False, help="Hajj", label_visibility="collapsed")
+    with col5:
+        is_school_vacation = st.checkbox("🏖️", value=False, help="School vacation", label_visibility="collapsed")
+    with col6:
+        is_festival = st.checkbox("🎪", value=False, help="Festivals", label_visibility="collapsed")
+    with col7:
+        is_sports_event = st.checkbox("🏎️", value=False, help="Formula 1", label_visibility="collapsed")
+    with col8:
+        is_conference = st.checkbox("💼", value=False, help="Conferences", label_visibility="collapsed")
 
 # Combine events for pricing engine (backwards compatibility)
 is_major_event = is_festival or is_sports_event or is_conference or is_hajj
