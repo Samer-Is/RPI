@@ -22,9 +22,11 @@ class SaudiCompetitorScraper:
         
         # Competitor websites in Saudi Arabia
         self.competitors = {
-            'Theeb': 'https://www.theeb.com.sa/en/',
-            'Lumi': 'https://www.lumi.com.sa/en/',
-            'Budget': 'https://www.avis-saudi.com/en/',  # Avis-Budget Saudi
+            'Theeb': 'https://www.theeb.com.sa/en/car-rental-offers',
+            'Hertz_Global': 'https://www.hertz.com/rentacar/reservation/',
+            'Budget_Global': 'https://www.budget.com/en/home',
+            'Yelo': 'https://www.yelo.sa/',
+            'AlMajdouie': 'https://www.almajdouie.com/',
         }
         
         # Location mapping
@@ -49,19 +51,41 @@ class SaudiCompetitorScraper:
         }
     
     def _init_driver(self):
-        """Initialize Chrome driver"""
+        """Initialize Chrome driver with anti-detection"""
         chrome_options = Options()
         if self.headless:
-            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--headless=new')
+        
+        # Anti-detection measures
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_argument('--disable-infobars')
         chrome_options.add_argument('--ignore-certificate-errors')
         chrome_options.add_argument('--ignore-ssl-errors')
-        chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+        chrome_options.add_argument('--disable-web-security')
+        chrome_options.add_argument('--allow-running-insecure-content')
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        
+        # Additional preferences
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        prefs = {
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
         
         self.driver = webdriver.Chrome(options=chrome_options)
-        self.driver.set_page_load_timeout(30)
+        
+        # Execute script to hide automation
+        self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+            "userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        })
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        
+        self.driver.set_page_load_timeout(60)
     
     def _close_driver(self):
         """Close driver"""
@@ -233,27 +257,53 @@ class SaudiCompetitorScraper:
             return []
     
     def scrape_simple(self, competitor_name, url):
-        """Extract prices from competitor website"""
+        """Extract prices from competitor website - aggressive mode"""
         try:
             print(f"Scraping {competitor_name}...")
-            self.driver.get(url)
-            time.sleep(8)
             
-            # Scroll to load content
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
-            time.sleep(3)
+            # Try to load page with retries
+            for attempt in range(3):
+                try:
+                    self.driver.get(url)
+                    break
+                except:
+                    if attempt < 2:
+                        print(f"  Retry {attempt+1}/3...")
+                        time.sleep(2)
+                    else:
+                        raise
             
-            # Get page HTML
+            time.sleep(5)
+            
+            # Scroll multiple times to load lazy content
+            for i in range(3):
+                scroll_position = (i + 1) * (self.driver.execute_script("return document.body.scrollHeight") / 4)
+                self.driver.execute_script(f"window.scrollTo(0, {scroll_position});")
+                time.sleep(1)
+            
+            # Get full page source
             html = self.driver.page_source
+            body_text = self.driver.find_element(By.TAG_NAME, 'body').text
             
-            # Extract all numbers that look like prices
-            # Look for patterns: SAR 150, 150 SAR, SR 150, 150/day, etc.
+            # Aggressive price extraction - multiple patterns
             patterns = [
-                r'(?:SAR|SR|ريال)\s*(\d+(?:,\d{3})*)',
-                r'(\d+(?:,\d{3})*)\s*(?:SAR|SR|ريال)',
-                r'(\d+)\s*/\s*(?:day|يوم)',
-                r'daily.*?(\d{3})',
-                r'per\s*day.*?(\d{3})',
+                # Arabic SAR
+                r'ريال\s*(\d+)',
+                r'(\d+)\s*ريال',
+                # English SAR/SR
+                r'(?:SAR|SR)\s*(\d+(?:[,\.]\d+)*)',
+                r'(\d+(?:[,\.]\d+)*)\s*(?:SAR|SR)',
+                # Per day patterns
+                r'(\d{2,4})\s*/\s*(?:day|يوم)',
+                r'(?:day|يوم).*?(\d{2,4})',
+                # Daily rate patterns
+                r'daily\s*rate.*?(\d{2,4})',
+                r'rate.*?(\d{2,4})\s*SAR',
+                # Generic 3-4 digit numbers (prices likely in this range)
+                r'\b(\d{3,4})\s*(?:SAR|SR|ريال)',
+                # From/starting patterns
+                r'from\s*(\d{2,4})',
+                r'starting.*?(\d{2,4})',
             ]
             
             found_prices = set()
@@ -261,14 +311,27 @@ class SaudiCompetitorScraper:
                 matches = re.findall(pattern, html, re.I)
                 for match in matches:
                     try:
-                        price = float(str(match).replace(',', ''))
-                        if 80 < price < 1500:  # Reasonable daily rate range
+                        price_str = str(match).replace(',', '').replace('.', '')
+                        price = float(price_str)
+                        if 80 < price < 1500:  # Daily rate range
+                            found_prices.add(int(price))
+                    except:
+                        pass
+            
+            # Also check body text separately
+            for pattern in patterns:
+                matches = re.findall(pattern, body_text, re.I)
+                for match in matches:
+                    try:
+                        price_str = str(match).replace(',', '').replace('.', '')
+                        price = float(price_str)
+                        if 80 < price < 1500:
                             found_prices.add(int(price))
                     except:
                         pass
             
             results = []
-            for price in list(found_prices)[:5]:
+            for price in sorted(found_prices)[:10]:  # Take up to 10 prices
                 results.append({
                     'vehicle': f'{competitor_name}',
                     'category': 'Various',
@@ -277,11 +340,11 @@ class SaudiCompetitorScraper:
                     'currency': 'SAR'
                 })
             
-            print(f"  Found {len(results)} prices: {[r['price'] for r in results]}")
+            print(f"  Found {len(results)} prices: {sorted([r['price'] for r in results])}")
             return results
             
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Error: {str(e)[:100]}")
             return []
     
     def _match_category(self, vehicle_text, target_category):
@@ -320,11 +383,16 @@ class SaudiCompetitorScraper:
             print(f"Scraping competitors for {category} at {location}...")
             all_results = []
             
-            # Scrape each competitor
-            for name, url in self.competitors.items():
+            # Scrape each competitor (max 3 to avoid long waits)
+            scraped_count = 0
+            for name, url in list(self.competitors.items())[:3]:
+                if scraped_count >= 3:
+                    break
                 results = self.scrape_simple(name, url)
-                all_results.extend(results)
-                time.sleep(2)  # Be polite
+                if results:
+                    all_results.extend(results)
+                    scraped_count += 1
+                time.sleep(3)  # Delay between sites
             
             if not all_results:
                 return {
@@ -348,7 +416,7 @@ class SaudiCompetitorScraper:
                         'Competitor_Category': result['category'],
                         'Vehicle': result['vehicle'],
                         'Date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                        'Source': 'Kayak',
+                        'Source': result['provider'],
                         'Confidence': 95
                     })
             
@@ -362,7 +430,7 @@ class SaudiCompetitorScraper:
                         'Competitor_Category': result['category'],
                         'Vehicle': result['vehicle'],
                         'Date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                        'Source': 'Kayak',
+                        'Source': result['provider'],
                         'Confidence': 70
                     })
             
