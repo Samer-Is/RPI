@@ -33,13 +33,16 @@ class SaudiCompetitorScraper:
             'AlMajdouie': 'https://www.almajdouie.com/',
         }
         
-        # Location mapping
-        self.location_search_terms = {
-            'riyadh': 'Riyadh Airport',
-            'jeddah': 'Jeddah Airport',
-            'dammam': 'Dammam Airport',
-            'mecca': 'Makkah',
-            'medina': 'Madinah',
+        # Complete location mapping for all Renty branches
+        self.location_mapping = {
+            'King Khalid Airport - Riyadh': {'search': 'Riyadh Airport RUH', 'city': 'Riyadh', 'is_airport': True},
+            'Olaya District - Riyadh': {'search': 'Riyadh Olaya', 'city': 'Riyadh', 'is_airport': False},
+            'King Fahd Airport - Dammam': {'search': 'Dammam Airport DMM', 'city': 'Dammam', 'is_airport': True},
+            'King Abdulaziz Airport - Jeddah': {'search': 'Jeddah Airport JED', 'city': 'Jeddah', 'is_airport': True},
+            'Al Khobar Business District': {'search': 'Al Khobar', 'city': 'Al Khobar', 'is_airport': False},
+            'Mecca City Center': {'search': 'Makkah', 'city': 'Mecca', 'is_airport': False},
+            'Medina Downtown': {'search': 'Madinah', 'city': 'Medina', 'is_airport': False},
+            'Riyadh City Center': {'search': 'Riyadh City', 'city': 'Riyadh', 'is_airport': False},
         }
         
         # Category matching
@@ -97,13 +100,19 @@ class SaudiCompetitorScraper:
             self.driver.quit()
             self.driver = None
     
-    def _extract_location(self, branch_name):
-        """Extract location from branch name"""
-        branch_lower = branch_name.lower()
-        for location, search_term in self.location_search_terms.items():
-            if location in branch_lower:
-                return search_term
-        return 'Riyadh Airport'  # Default
+    def _get_location_info(self, branch_name):
+        """Get location info for branch"""
+        # Try exact match first
+        if branch_name in self.location_mapping:
+            return self.location_mapping[branch_name]
+        
+        # Try partial match
+        for renty_branch, info in self.location_mapping.items():
+            if branch_name.lower() in renty_branch.lower() or renty_branch.lower() in branch_name.lower():
+                return info
+        
+        # Default to Riyadh Airport
+        return {'search': 'Riyadh Airport RUH', 'city': 'Riyadh', 'is_airport': True}
     
     def scrape_hertz_sa(self, location, pickup_date, return_date):
         """Scrape Hertz Saudi Arabia"""
@@ -260,10 +269,10 @@ class SaudiCompetitorScraper:
             traceback.print_exc()
             return []
     
-    def scrape_simple(self, competitor_name, url):
-        """Extract prices from competitor website - aggressive mode"""
+    def scrape_with_location_and_category(self, competitor_name, url, location_info, target_category):
+        """Extract prices from competitor website with location and category matching"""
         try:
-            print(f"Scraping {competitor_name}...")
+            print(f"Scraping {competitor_name} for {target_category} in {location_info['city']}...")
             
             # Try to load page with retries
             for attempt in range(3):
@@ -289,23 +298,39 @@ class SaudiCompetitorScraper:
             html = self.driver.page_source
             body_text = self.driver.find_element(By.TAG_NAME, 'body').text
             
-            # Aggressive price extraction - multiple patterns
+            # Extract vehicle cards/sections (try to find structured data)
+            vehicle_data = self._extract_vehicle_cards(html, body_text)
+            
+            # If structured extraction worked, use it
+            if vehicle_data:
+                print(f"  Found {len(vehicle_data)} vehicles with categories")
+                results = []
+                for veh in vehicle_data:
+                    if self._match_category(veh['category'], target_category):
+                        results.append({
+                            'vehicle': veh['vehicle'],
+                            'category': veh['category'],
+                            'price': veh['price'],
+                            'provider': competitor_name,
+                            'currency': 'SAR',
+                            'confidence': 90
+                        })
+                
+                if results:
+                    print(f"  Matched {len(results)} to {target_category}")
+                    return results
+            
+            # Fallback: aggressive price extraction
+            print(f"  Using fallback extraction...")
             patterns = [
-                # Arabic SAR
                 r'ريال\s*(\d+)',
                 r'(\d+)\s*ريال',
-                # English SAR/SR
                 r'(?:SAR|SR)\s*(\d+(?:[,\.]\d+)*)',
                 r'(\d+(?:[,\.]\d+)*)\s*(?:SAR|SR)',
-                # Per day patterns
                 r'(\d{2,4})\s*/\s*(?:day|يوم)',
                 r'(?:day|يوم).*?(\d{2,4})',
-                # Daily rate patterns
                 r'daily\s*rate.*?(\d{2,4})',
-                r'rate.*?(\d{2,4})\s*SAR',
-                # Generic 3-4 digit numbers (prices likely in this range)
                 r'\b(\d{3,4})\s*(?:SAR|SR|ريال)',
-                # From/starting patterns
                 r'from\s*(\d{2,4})',
                 r'starting.*?(\d{2,4})',
             ]
@@ -317,49 +342,147 @@ class SaudiCompetitorScraper:
                     try:
                         price_str = str(match).replace(',', '').replace('.', '')
                         price = float(price_str)
-                        if 80 < price < 1500:  # Daily rate range
-                            found_prices.add(int(price))
-                    except:
-                        pass
-            
-            # Also check body text separately
-            for pattern in patterns:
-                matches = re.findall(pattern, body_text, re.I)
-                for match in matches:
-                    try:
-                        price_str = str(match).replace(',', '').replace('.', '')
-                        price = float(price_str)
                         if 80 < price < 1500:
                             found_prices.add(int(price))
                     except:
                         pass
             
             results = []
-            for price in sorted(found_prices)[:10]:  # Take up to 10 prices
+            for price in sorted(found_prices)[:10]:
                 results.append({
                     'vehicle': f'{competitor_name}',
-                    'category': 'Various',
+                    'category': self._guess_category_from_price(price, target_category),
                     'price': price,
                     'provider': competitor_name,
-                    'currency': 'SAR'
+                    'currency': 'SAR',
+                    'confidence': 50
                 })
             
-            print(f"  Found {len(results)} prices: {sorted([r['price'] for r in results])}")
+            print(f"  Found {len(results)} prices")
             return results
             
         except Exception as e:
             print(f"  Error: {str(e)[:100]}")
             return []
     
+    def _extract_vehicle_cards(self, html, body_text):
+        """Try to extract vehicle information with categories from page structure"""
+        vehicles = []
+        
+        # Try to find vehicle cards/sections
+        try:
+            # Look for common car category keywords near prices
+            lines = body_text.split('\n')
+            
+            for i, line in enumerate(lines):
+                # Check if line contains a price
+                price_match = re.search(r'(?:SAR|SR|ريال)?\s*(\d{2,4})\s*(?:SAR|SR|ريال|/day|per day)?', line, re.I)
+                if price_match:
+                    price = int(price_match.group(1))
+                    if 80 < price < 1500:
+                        # Look for category keywords in surrounding lines
+                        context = '\n'.join(lines[max(0, i-3):min(len(lines), i+3)])
+                        category = self._extract_category_from_context(context)
+                        vehicle_name = self._extract_vehicle_name(context)
+                        
+                        if category or vehicle_name:
+                            vehicles.append({
+                                'vehicle': vehicle_name or 'Car',
+                                'category': category or 'Various',
+                                'price': price
+                            })
+        except Exception as e:
+            print(f"  Card extraction error: {e}")
+        
+        return vehicles
+    
+    def _extract_category_from_context(self, text):
+        """Extract category from text context"""
+        text_lower = text.lower()
+        
+        # Priority order: more specific first
+        if any(word in text_lower for word in ['luxury suv', 'premium suv', 'large suv']):
+            return 'Luxury SUV'
+        if any(word in text_lower for word in ['luxury', 'premium', 'executive']):
+            return 'Luxury Sedan'
+        if any(word in text_lower for word in ['full-size suv', 'full size suv']):
+            return 'SUV Large'
+        if any(word in text_lower for word in ['standard suv', 'mid suv', 'midsize suv']):
+            return 'SUV Standard'
+        if any(word in text_lower for word in ['compact suv', 'small suv', 'crossover']):
+            return 'SUV Compact'
+        if any(word in text_lower for word in ['suv']):
+            return 'SUV Standard'
+        if any(word in text_lower for word in ['standard', 'intermediate', 'midsize']):
+            return 'Standard'
+        if any(word in text_lower for word in ['compact', 'small car']):
+            return 'Compact'
+        if any(word in text_lower for word in ['economy', 'mini', 'budget']):
+            return 'Economy'
+        
+        return None
+    
+    def _extract_vehicle_name(self, text):
+        """Extract vehicle name from context"""
+        # Look for common car brand names
+        brands = ['Toyota', 'Hyundai', 'Nissan', 'Kia', 'BMW', 'Mercedes', 'Audi', 
+                  'Chevrolet', 'Ford', 'Honda', 'Mazda', 'Mitsubishi']
+        
+        for brand in brands:
+            if brand.lower() in text.lower():
+                # Try to extract model too
+                match = re.search(rf'{brand}\s+(\w+)', text, re.I)
+                if match:
+                    return f"{brand} {match.group(1)}"
+                return brand
+        
+        return None
+    
+    def _guess_category_from_price(self, price, target_category):
+        """Guess category based on price range"""
+        if price < 120:
+            return 'Economy'
+        elif price < 160:
+            return 'Compact'
+        elif price < 200:
+            return 'Standard'
+        elif price < 250:
+            return 'SUV Compact'
+        elif price < 300:
+            return 'SUV Standard'
+        elif price < 350:
+            return 'SUV Large'
+        elif price < 450:
+            return 'Luxury Sedan'
+        else:
+            return 'Luxury SUV'
+    
     def _match_category(self, vehicle_text, target_category):
-        """Match scraped vehicle to target category"""
+        """Match scraped vehicle to target category with fuzzy matching"""
         if not vehicle_text:
             return False
         
         vehicle_lower = vehicle_text.lower()
-        keywords = self.category_keywords.get(target_category, [])
         
-        return any(keyword in vehicle_lower for keyword in keywords)
+        # Exact category match
+        if target_category.lower() in vehicle_lower:
+            return True
+        
+        # Keyword matching
+        keywords = self.category_keywords.get(target_category, [])
+        if any(keyword in vehicle_lower for keyword in keywords):
+            return True
+        
+        # Cross-category partial matches
+        # SUV variants
+        if 'suv' in target_category.lower() and 'suv' in vehicle_lower:
+            return True
+        
+        # Luxury variants
+        if 'luxury' in target_category.lower() and any(word in vehicle_lower for word in ['luxury', 'premium', 'executive']):
+            return True
+        
+        return False
     
     def _get_cache_key(self, branch_name, category):
         """Generate cache key"""
@@ -423,20 +546,20 @@ class SaudiCompetitorScraper:
         pickup_date = date
         return_date = date + timedelta(days=1)
         
-        location = self._extract_location(branch_name)
+        location_info = self._get_location_info(branch_name)
         
         try:
             self._init_driver()
             
-            print(f"Scraping competitors for {category} at {location}...")
+            print(f"Scraping for {category} at {location_info['city']} ({location_info['search']})...")
             all_results = []
             
-            # Scrape each competitor
+            # Scrape each competitor with location and category
             scraped_count = 0
             for name, url in list(self.competitors.items())[:3]:
                 if scraped_count >= 3:
                     break
-                results = self.scrape_simple(name, url)
+                results = self.scrape_with_location_and_category(name, url, location_info, category)
                 if results:
                     all_results.extend(results)
                     scraped_count += 1
@@ -453,34 +576,38 @@ class SaudiCompetitorScraper:
                     'is_live': False
                 }
             
-            # Filter results that match requested category
+            # Filter and rank results by category match
             matched_results = []
             for result in all_results:
                 vehicle_text = f"{result['vehicle']} {result['category']}"
-                if self._match_category(vehicle_text, category):
-                    matched_results.append({
-                        'Competitor_Name': result['provider'],
-                        'Competitor_Price': int(result['price']),
-                        'Competitor_Category': result['category'],
-                        'Vehicle': result['vehicle'],
-                        'Date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                        'Source': result['provider'],
-                        'Confidence': 95
-                    })
+                confidence = result.get('confidence', 70)
+                
+                # Boost confidence if category matches exactly
+                if result['category'] == category:
+                    confidence = min(95, confidence + 20)
+                elif self._match_category(vehicle_text, category):
+                    confidence = min(85, confidence + 10)
+                
+                matched_results.append({
+                    'Competitor_Name': result['provider'],
+                    'Competitor_Price': int(result['price']),
+                    'Competitor_Category': result['category'],
+                    'Vehicle': result['vehicle'],
+                    'Date': datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    'Source': result['provider'],
+                    'Confidence': confidence,
+                    'Location': location_info['city']
+                })
             
-            # If no exact matches, use closest prices
-            if not matched_results and all_results:
-                print(f"No exact match for {category}, using available results")
-                for result in all_results[:3]:  # Take first 3
-                    matched_results.append({
-                        'Competitor_Name': result['provider'],
-                        'Competitor_Price': int(result['price']),
-                        'Competitor_Category': result['category'],
-                        'Vehicle': result['vehicle'],
-                        'Date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                        'Source': result['provider'],
-                        'Confidence': 70
-                    })
+            # Sort by confidence and relevance
+            matched_results.sort(key=lambda x: (x['Confidence'], -abs(x['Competitor_Price'] - 200)), reverse=True)
+            
+            # Take top results
+            if not matched_results:
+                print(f"No results found for {category}")
+            else:
+                print(f"Found {len(matched_results)} results (top confidence: {matched_results[0]['Confidence']}%)")
+                matched_results = matched_results[:5]  # Top 5 most relevant
             
             if not matched_results:
                 return {
