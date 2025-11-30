@@ -20,7 +20,7 @@ from pathlib import Path
 from pricing_engine import DynamicPricingEngine
 import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
-from live_competitor_pricing import get_competitor_prices_for_dashboard, compare_with_competitors as compare_live, compare_with_competitors
+from real_competitor_pricing import get_competitor_prices_for_dashboard, compare_with_competitors
 from utilization_query import get_current_utilization
 
 # Page configuration
@@ -98,45 +98,46 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Vehicle Categories with base prices (SAR per day)
+# Based on database analysis of 2.46M contracts
 VEHICLE_CATEGORIES = {
     "Economy": {
         "examples": "Hyundai Accent, Kia Picanto, Nissan Sunny",
-        "base_price": 150.0,
+        "base_price": 175.0,
         "icon": "🚗"
     },
     "Compact": {
         "examples": "Toyota Yaris, Hyundai Elantra, Kia Cerato",
-        "base_price": 180.0,
+        "base_price": 183.0,
         "icon": "🚙"
     },
     "Standard": {
         "examples": "Toyota Camry, Hyundai Sonata, Nissan Altima",
-        "base_price": 220.0,
+        "base_price": 190.0,
         "icon": "🚘"
     },
     "SUV Compact": {
         "examples": "Hyundai Tucson, Nissan Qashqai, Kia Sportage",
-        "base_price": 280.0,
+        "base_price": 200.0,
         "icon": "🚐"
     },
     "SUV Standard": {
         "examples": "Toyota RAV4, Nissan X-Trail, Hyundai Santa Fe",
-        "base_price": 350.0,
+        "base_price": 210.0,
         "icon": "🚙"
     },
     "SUV Large": {
         "examples": "Toyota Land Cruiser, Nissan Patrol, Chevrolet Tahoe",
-        "base_price": 500.0,
+        "base_price": 250.0,
         "icon": "🚐"
     },
     "Luxury Sedan": {
         "examples": "BMW 5 Series, Mercedes E-Class, Audi A6",
-        "base_price": 600.0,
+        "base_price": 290.0,
         "icon": "🚗"
     },
     "Luxury SUV": {
         "examples": "BMW X5, Mercedes GLE, Audi Q7",
-        "base_price": 800.0,
+        "base_price": 348.0,
         "icon": "🚙"
     }
 }
@@ -260,27 +261,27 @@ with col2:
     st.info(f"👋 Welcome, **{user_role}**! Manage pricing for **{branch_info['name']}**")
 
 # Pricing Mode Indicator
-pricing_mode = getattr(config, 'PRICING_MODE', 'multiplicative')
-if pricing_mode == 'hierarchical':
-    st.success("""
-    ✅ **Pricing Strategy: HIERARCHICAL (Industry Best Practice)**
+#pricing_mode = getattr(config, 'PRICING_MODE', 'multiplicative')
+#if pricing_mode == 'hierarchical':
+#    st.success("""
+ #   ✅ **Pricing Strategy: HIERARCHICAL (Industry Best Practice)**
     
-    Following Emirates/Booking.com/Hertz standards:
-    - 🎯 **Demand forecast** = PRIMARY driver (sets direction)
-    - 🚗 **Fleet utilization** = SECONDARY (acts as guardrail/accelerator)
-    - When demand predicts discount but utilization is high → Discount is constrained
-    - When demand predicts premium and utilization is high → Premium is accelerated
-    """)
-else:
-    st.info("""
-    ℹ️ **Pricing Strategy: MULTIPLICATIVE (Legacy/Balanced)**
-    
-    All factors are weighted equally:
-    - Demand × Supply × Events = Final Price
-    - All multipliers can influence the outcome equally
-    """)
+#    Following Emirates/Booking.com/Hertz standards:
+#    - 🎯 **Demand forecast** = PRIMARY driver (sets direction)
+#    - 🚗 **Fleet utilization** = SECONDARY (acts as guardrail/accelerator)
+#    - When demand predicts discount but utilization is high → Discount is constrained
+#    - When demand predicts premium and utilization is high → Premium is accelerated
+#    """)
+#else:
+#    st.info("""
+#    ℹ️ **Pricing Strategy: MULTIPLICATIVE (Legacy/Balanced)**
+#    
+#    All factors are weighted equally:
+#    - Demand × Supply × Events = Final Price
+#    - All multipliers can influence the outcome equally
+#    """)
 
-st.markdown("---")
+#st.markdown("---")
 
 # Date and condition selectors
 st.markdown("### 📅 Date & Conditions")
