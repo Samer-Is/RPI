@@ -1,0 +1,219 @@
+﻿python : 2025-11-30 10:49:01,221 - pricing_rules - INFO - PricingRules initialized: min=0.8, max=2.5
+At C:\Users\s.ismail\AppData\Local\Temp\ps-script-ff254190-5685-4085-ac2a-d36cffdc8b4d.ps1:100 char:107
++ ... \dynamic_pricing_v3_vs"; python compare_pricing_modes.py 2>&1 | Out-F ...
++                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2025-11-30 10:4...in=0.8, max=2.5:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+====================================================================================================
+PRICING MODE COMPARISON: Multiplicative vs Hierarchical
+====================================================================================================
+
+====================================================================================================
+SCENARIO: Low Demand + High Utilization (Your Case)
+====================================================================================================
+
+Inputs:
+  Base Price:         200 SAR
+  Predicted Demand:   60 (avg: 100)
+  Demand Ratio:       0.60x
+  Utilization:        83.9% (1910/2277 rented)
+  Available:          367 vehicles
+
+--------------------------------------------------
+MULTIPLICATIVE MODE (Legacy):
+--------------------------------------------------
+  Demand Multiplier:  0.85x
+  Supply Multiplier:  1.15x
+  Event Multiplier:   1.00x
+  Combined:           0.85 x 1.15 x 1.0 = 0.9800
+  Final Price:        195.5 SAR (-2.3%)
+
+--------------------------------------------------
+HIERARCHICAL MODE (Best Practice):
+--------------------------------------------------
+  Demand Multiplier:  0.85x (PRIMARY)
+  Supply Multiplier:  1.15x (SECONDARY)
+  Event Multiplier:   1.00x (stacks with demand)
+  Mode Logic:         Demand-led discount (-15.0%), constrained by high utilization to -6.0%
+  Final Price:        188.0 SAR (-6.0%)
+
+--------------------------------------------------
+DIFFERENCE:
+--------------------------------------------------
+  Price Difference:   -7.50 SAR
+  Percent Difference: -3.7 percentage points
+  Impact:             Hierarchical is CHEAPER (better for bookings)
+
+====================================================================================================
+SCENARIO: High Demand + High Utilization
+====================================================================================================
+
+Inputs:
+  Base Price:         200 SAR
+  Predicted Demand:   150 (avg: 100)
+  Demand Ratio:       1.50x
+  Utilization:        80.0% (800/1000 rented)
+  Available:          200 vehicles
+
+--------------------------------------------------
+MULTIPLICATIVE MODE (Legacy):
+--------------------------------------------------
+  Demand Multiplier:  1.20x
+  Supply Multiplier:  1.10x
+  Event Multiplier:   1.00x
+  Combined:           1.2 x 1.1 x 1.0 = 1.3200
+  Final Price:        264.0 SAR (+32.0%)
+
+--------------------------------------------------
+HIERARCHICAL MODE (Best Practice):
+--------------------------------------------------
+  Demand Multiplier:  1.20x (PRIMARY)
+  Supply Multiplier:  1.10x (SECONDARY)
+  Event Multiplier:   1.00x (stacks with demand)
+  Mode Logic:         Demand-led premium (+20.0%), accelerated by high utilization to +26.0%
+  Final Price:        252.0 SAR (+26.0%)
+
+--------------------------------------------------
+DIFFERENCE:
+--------------------------------------------------
+  Price Difference:   -12.00 SAR
+  Percent Difference: -6.0 percentage points
+  Impact:             Hierarchical is CHEAPER (better for bookings)
+
+====================================================================================================
+SCENARIO: Low Demand + Low Utilization
+====================================================================================================
+
+Inputs:
+  Base Price:         200 SAR
+  Predicted Demand:   60 (avg: 100)
+  Demand Ratio:       0.60x
+  Utilization:        20.0% (200/1000 rented)
+  Available:          800 vehicles
+
+--------------------------------------------------
+MULTIPLICATIVE MODE (Legacy):
+--------------------------------------------------
+  Demand Multiplier:  0.85x
+  Supply Multiplier:  0.90x
+  Event Multiplier:   1.00x
+  Combined:           0.85 x 0.9 x 1.0 = 0.7700
+  Final Price:        160.0 SAR (-20.0%)
+
+--------------------------------------------------
+HIERARCHICAL MODE (Best Practice):
+--------------------------------------------------
+  Demand Multiplier:  0.85x (PRIMARY)
+  Supply Multiplier:  0.90x (SECONDARY)
+  Event Multiplier:   1.00x (stacks with demand)
+  Mode Logic:         Demand-led discount (-15.0%), constrained by low utilization to -15.0%
+  Final Price:        170.0 SAR (-15.0%)
+
+--------------------------------------------------
+DIFFERENCE:
+--------------------------------------------------
+  Price Difference:   +10.00 SAR
+  Percent Difference: +5.0 percentage points
+  Impact:             Hierarchical is MORE EXPENSIVE (better for revenue)
+
+====================================================================================================
+SCENARIO: High Demand + Low Utilization
+====================================================================================================
+
+Inputs:
+  Base Price:         200 SAR
+  Predicted Demand:   150 (avg: 100)
+  Demand Ratio:       1.50x
+  Utilization:        20.0% (200/1000 rented)
+  Available:          800 vehicles
+
+--------------------------------------------------
+MULTIPLICATIVE MODE (Legacy):
+--------------------------------------------------
+  Demand Multiplier:  1.20x
+  Supply Multiplier:  0.90x
+  Event Multiplier:   1.00x
+Traceback (most recent call last):
+  File "C:\Users\s.ismail\OneDrive - Al-Manzumah Al-Muttahidah For IT 
+Systems\Desktop\dynamic_pricing_v3_vs\compare_pricing_modes.py", line 198, in <module>
+    compare_scenarios()
+  File "C:\Users\s.ismail\OneDrive - Al-Manzumah Al-Muttahidah For IT 
+Systems\Desktop\dynamic_pricing_v3_vs\compare_pricing_modes.py", line 173, in compare_scenarios
+    print("""
+  File "C:\ProgramData\Anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 539: character maps to <undefined>
+  Combined:           1.2 x 0.9 x 1.0 = 1.0800
+  Final Price:        216.0 SAR (+8.0%)
+
+--------------------------------------------------
+HIERARCHICAL MODE (Best Practice):
+--------------------------------------------------
+  Demand Multiplier:  1.20x (PRIMARY)
+  Supply Multiplier:  0.90x (SECONDARY)
+  Event Multiplier:   1.00x (stacks with demand)
+  Mode Logic:         Demand-led premium (+20.0%), accelerated by low utilization to +20.0%
+  Final Price:        240.0 SAR (+20.0%)
+
+--------------------------------------------------
+DIFFERENCE:
+--------------------------------------------------
+  Price Difference:   +24.00 SAR
+  Percent Difference: +12.0 percentage points
+  Impact:             Hierarchical is MORE EXPENSIVE (better for revenue)
+
+====================================================================================================
+SCENARIO: Holiday + High Demand + Low Availability
+====================================================================================================
+
+Inputs:
+  Base Price:         200 SAR
+  Predicted Demand:   160 (avg: 100)
+  Demand Ratio:       1.60x
+  Utilization:        90.0% (900/1000 rented)
+  Available:          100 vehicles
+  Holiday:            Yes
+  Weekend:            Yes
+
+--------------------------------------------------
+MULTIPLICATIVE MODE (Legacy):
+--------------------------------------------------
+  Demand Multiplier:  1.20x
+  Supply Multiplier:  1.15x
+  Event Multiplier:   1.21x
+  Combined:           1.2 x 1.15 x 1.21 = 1.6700
+  Final Price:        333.27 SAR (+66.6%)
+
+--------------------------------------------------
+HIERARCHICAL MODE (Best Practice):
+--------------------------------------------------
+  Demand Multiplier:  1.20x (PRIMARY)
+  Supply Multiplier:  1.15x (SECONDARY)
+  Event Multiplier:   1.21x (stacks with demand)
+  Mode Logic:         Demand-led premium (+44.9%), accelerated by high utilization to +58.4%
+  Final Price:        316.74 SAR (+58.4%)
+
+--------------------------------------------------
+DIFFERENCE:
+--------------------------------------------------
+  Price Difference:   -16.53 SAR
+  Percent Difference: -8.2 percentage points
+  Impact:             Hierarchical is CHEAPER (better for bookings)
+
+
+====================================================================================================
+SUMMARY COMPARISON TABLE
+====================================================================================================
+
+                                 Scenario Utilization Demand Mult_Price Mult_Change Hier_Price Hier_Change Difference
+Low Demand + High Utilization (Your Case)       83.9%  0.60x    196 SAR       -2.3%    188 SAR       -6.0%  -7.50 SAR
+           High Demand + High Utilization       80.0%  1.50x    264 SAR      +32.0%    252 SAR      +26.0% -12.00 SAR
+             Low Demand + Low Utilization       20.0%  0.60x    160 SAR      -20.0%    170 SAR      -15.0% +10.00 SAR
+            High Demand + Low Utilization       20.0%  1.50x    216 SAR       +8.0%    240 SAR      +20.0% +24.00 SAR
+ Holiday + High Demand + Low Availability       90.0%  1.60x    333 SAR      +66.6%    317 SAR      +58.4% -16.53 SAR
+
+====================================================================================================
+KEY INSIGHTS:
+====================================================================================================

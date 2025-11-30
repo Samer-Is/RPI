@@ -259,6 +259,27 @@ with col2:
     st.markdown('<p class="main-header">Intelligent Dynamic Pricing</p>', unsafe_allow_html=True)
     st.info(f"👋 Welcome, **{user_role}**! Manage pricing for **{branch_info['name']}**")
 
+# Pricing Mode Indicator
+pricing_mode = getattr(config, 'PRICING_MODE', 'multiplicative')
+if pricing_mode == 'hierarchical':
+    st.success("""
+    ✅ **Pricing Strategy: HIERARCHICAL (Industry Best Practice)**
+    
+    Following Emirates/Booking.com/Hertz standards:
+    - 🎯 **Demand forecast** = PRIMARY driver (sets direction)
+    - 🚗 **Fleet utilization** = SECONDARY (acts as guardrail/accelerator)
+    - When demand predicts discount but utilization is high → Discount is constrained
+    - When demand predicts premium and utilization is high → Premium is accelerated
+    """)
+else:
+    st.info("""
+    ℹ️ **Pricing Strategy: MULTIPLICATIVE (Legacy/Balanced)**
+    
+    All factors are weighted equally:
+    - Demand × Supply × Events = Final Price
+    - All multipliers can influence the outcome equally
+    """)
+
 st.markdown("---")
 
 # Date and condition selectors
@@ -558,12 +579,19 @@ with st.spinner("Calculating optimal prices for all categories..."):
                         </div>"""
                     
                     # Add multipliers section
+                    mode_explanation_html = ""
+                    if result.get('pricing_mode') == 'hierarchical' and result.get('mode_explanation'):
+                        mode_explanation_html = f"""<div style="background: #e7f3ff; padding: 0.5rem; border-radius: 0.3rem; margin-top: 0.5rem; font-size: 0.75rem; color: #004085;">
+                            <strong>Mode:</strong> {result['mode_explanation']}
+                        </div>"""
+                    
                     card_html += f"""<hr>
                         <div style="font-size: 0.85rem; text-align: left; margin-top: 1rem;">
                             <strong>Multipliers:</strong><br>
                             Demand: {result['demand_multiplier']:.2f}x<br>
                             Supply: {result['supply_multiplier']:.2f}x<br>
                             Events: {result['event_multiplier']:.2f}x
+                            {mode_explanation_html}
                         </div>
                     </div>"""
                     
@@ -646,12 +674,19 @@ with st.spinner("Calculating optimal prices for all categories..."):
                         </div>"""
                     
                     # Add multipliers section
+                    mode_explanation_html = ""
+                    if result.get('pricing_mode') == 'hierarchical' and result.get('mode_explanation'):
+                        mode_explanation_html = f"""<div style="background: #e7f3ff; padding: 0.5rem; border-radius: 0.3rem; margin-top: 0.5rem; font-size: 0.75rem; color: #004085;">
+                            <strong>Mode:</strong> {result['mode_explanation']}
+                        </div>"""
+                    
                     card_html += f"""<hr>
                         <div style="font-size: 0.85rem; text-align: left; margin-top: 1rem;">
                             <strong>Multipliers:</strong><br>
                             Demand: {result['demand_multiplier']:.2f}x<br>
                             Supply: {result['supply_multiplier']:.2f}x<br>
                             Events: {result['event_multiplier']:.2f}x
+                            {mode_explanation_html}
                         </div>
                     </div>"""
                     

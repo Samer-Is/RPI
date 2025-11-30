@@ -131,6 +131,46 @@ TEST_SIZE = 0.2
 VALIDATION_SIZE = 0.1
 
 # ============================================================================
+# PRICING STRATEGY CONFIGURATION
+# ============================================================================
+
+# Pricing Mode: Choose between two strategies
+# 
+# "multiplicative" (Current/Legacy):
+#   - All multipliers (demand, supply, event) are multiplied together equally
+#   - Formula: final = base × demand_mult × supply_mult × event_mult
+#   - Result: Multipliers can "cancel out" (e.g., 0.85 × 1.15 = 0.9775)
+#   - Good for: Balanced approach where all factors are equally important
+#
+# "hierarchical" (Best Practice / Industry Standard):
+#   - Demand is PRIMARY driver, utilization is SECONDARY (guardrail/accelerator)
+#   - Follows airline/hotel revenue management best practices
+#   - Demand forecast → sets direction, Utilization → constrains or accelerates
+#   - Result: Demand leads, utilization modulates based on context
+#   - Good for: Aligning with Emirates/Booking.com/Hertz industry standards
+#
+PRICING_MODE = "hierarchical"  # Options: "multiplicative" or "hierarchical"
+
+# Hierarchical Mode Parameters (only used when PRICING_MODE = "hierarchical")
+HIERARCHICAL_CONFIG = {
+    # How much to constrain discounts when utilization is high
+    # Higher value = more aggressive discounts even when busy
+    'discount_constraint_high_util': 0.40,    # Apply 40% of discount when >80% utilized
+    'discount_constraint_medium_util': 0.70,  # Apply 70% of discount when 60-80% utilized
+    'discount_constraint_low_util': 1.00,     # Apply 100% of discount when <60% utilized
+    
+    # How much to accelerate premiums when utilization is high
+    # Higher value = more aggressive premiums when busy
+    'premium_acceleration_high_util': 1.30,   # Amplify premium by 30% when >80% utilized
+    'premium_acceleration_medium_util': 1.15, # Amplify premium by 15% when 60-80% utilized
+    'premium_acceleration_low_util': 1.00,    # No amplification when <60% utilized
+    
+    # Utilization thresholds (%)
+    'high_utilization_threshold': 80,   # Above this = "high utilization"
+    'medium_utilization_threshold': 60, # Between this and high = "medium"
+}
+
+# ============================================================================
 # LOGGING
 # ============================================================================
 

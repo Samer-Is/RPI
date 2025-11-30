@@ -15,6 +15,7 @@ import logging
 import numpy as np
 import pandas as pd
 from typing import Dict, Tuple
+import config
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -279,11 +280,29 @@ class PricingRules:
             is_weekend, city_name, is_airport, days_to_holiday
         )
         
-        # Combined multiplier
-        combined_mult = demand_mult * supply_mult * event_mult
+        # Calculate utilization percentage for hierarchical mode
+        utilization_pct = ((total_vehicles - available_vehicles) / total_vehicles * 100) if total_vehicles > 0 else 0
+        
+        # Choose pricing mode based on config
+        pricing_mode = getattr(config, 'PRICING_MODE', 'multiplicative')  # Default to multiplicative for backward compatibility
+        
+        if pricing_mode == 'hierarchical':
+            # HIERARCHICAL MODE (Industry Best Practice)
+            # Demand is primary, utilization is secondary (guardrail/accelerator)
+            final_mult, mode_explanation = self.calculate_hierarchical_multiplier(
+                demand_mult, supply_mult, event_mult, utilization_pct
+            )
+            combined_mult = final_mult  # For reporting
+            
+        else:
+            # MULTIPLICATIVE MODE (Current/Legacy)
+            # All factors multiply together equally
+            combined_mult = demand_mult * supply_mult * event_mult
+            final_mult = combined_mult
+            mode_explanation = "Multiplicative: All factors equally weighted"
         
         # Apply min/max constraints
-        final_mult = np.clip(combined_mult, self.min_multiplier, self.max_multiplier)
+        final_mult = np.clip(final_mult, self.min_multiplier, self.max_multiplier)
         
         # Calculate final price
         final_price = base_price * final_mult
@@ -307,8 +326,105 @@ class PricingRules:
             'combined_multiplier': round(combined_mult, 2),
             'final_multiplier': round(final_mult, 2),
             'price_change_pct': round((final_mult - 1.00) * 100, 1),
-            'explanation': explanation
+            'explanation': explanation,
+            'pricing_mode': pricing_mode,
+            'mode_explanation': mode_explanation if pricing_mode == 'hierarchical' else None
         }
+    
+    def calculate_hierarchical_multiplier(self,
+                                         demand_mult: float,
+                                         supply_mult: float,
+                                         event_mult: float,
+                                         utilization_pct: float) -> Tuple[float, str]:
+        """
+        Calculate multiplier using hierarchical (industry best-practice) approach.
+        
+        Philosophy (following Emirates/Booking.com/Hertz):
+        - Demand forecast is PRIMARY driver (sets the direction)
+        - Events amplify demand signal (stack with demand)
+        - Utilization is SECONDARY (acts as guardrail or accelerator)
+        
+        Logic:
+        1. Combine demand + events → primary signal
+        2. Check if primary signal is discount, premium, or neutral
+        3. Use utilization to:
+           - CONSTRAIN discounts when busy (protect revenue)
+           - ACCELERATE premiums when busy (maximize revenue)
+           - Stay neutral when availability is normal
+        
+        Args:
+            demand_mult: Demand multiplier (0.85-1.20)
+            supply_mult: Supply multiplier (0.90-1.15)
+            event_mult: Event multiplier (1.00-1.60)
+            utilization_pct: Current utilization percentage (0-100)
+            
+        Returns:
+            (final_multiplier, mode_explanation)
+        """
+        # Step 1: Demand + Events = Primary driver
+        primary_signal = demand_mult * event_mult
+        
+        # Step 2: Determine scenario (discount, premium, or neutral)
+        if primary_signal < 1.0:
+            # DISCOUNT SCENARIO: Demand is below average
+            # Utilization acts as CONSTRAINT (limits how low we go)
+            
+            # Get constraint factor based on utilization
+            if utilization_pct >= config.HIERARCHICAL_CONFIG['high_utilization_threshold']:
+                constraint = config.HIERARCHICAL_CONFIG['discount_constraint_high_util']
+                util_status = "High utilization"
+            elif utilization_pct >= config.HIERARCHICAL_CONFIG['medium_utilization_threshold']:
+                constraint = config.HIERARCHICAL_CONFIG['discount_constraint_medium_util']
+                util_status = "Medium utilization"
+            else:
+                constraint = config.HIERARCHICAL_CONFIG['discount_constraint_low_util']
+                util_status = "Low utilization"
+            
+            # Apply constraint: 1 + (primary_signal - 1) × constraint
+            # Example: If primary says -15% discount but util is high (constraint=0.4):
+            #   1 + (0.85 - 1) × 0.4 = 1 + (-0.15 × 0.4) = 0.94 → -6% discount
+            final_mult = 1.0 + (primary_signal - 1.0) * constraint
+            
+            mode_explanation = (
+                f"Demand-led discount ({(primary_signal-1)*100:+.1f}%), "
+                f"constrained by {util_status.lower()} to {(final_mult-1)*100:+.1f}%"
+            )
+            
+        elif primary_signal > 1.0:
+            # PREMIUM SCENARIO: Demand is above average
+            # Utilization acts as ACCELERATOR (amplifies premium)
+            
+            # Get acceleration factor based on utilization
+            if utilization_pct >= config.HIERARCHICAL_CONFIG['high_utilization_threshold']:
+                acceleration = config.HIERARCHICAL_CONFIG['premium_acceleration_high_util']
+                util_status = "High utilization"
+            elif utilization_pct >= config.HIERARCHICAL_CONFIG['medium_utilization_threshold']:
+                acceleration = config.HIERARCHICAL_CONFIG['premium_acceleration_medium_util']
+                util_status = "Medium utilization"
+            else:
+                acceleration = config.HIERARCHICAL_CONFIG['premium_acceleration_low_util']
+                util_status = "Low utilization"
+            
+            # Apply acceleration: 1 + (primary_signal - 1) × acceleration
+            # Example: If primary says +20% premium and util is high (acceleration=1.3):
+            #   1 + (1.20 - 1) × 1.3 = 1 + (0.20 × 1.3) = 1.26 → +26% premium
+            final_mult = 1.0 + (primary_signal - 1.0) * acceleration
+            
+            mode_explanation = (
+                f"Demand-led premium ({(primary_signal-1)*100:+.1f}%), "
+                f"accelerated by {util_status.lower()} to {(final_mult-1)*100:+.1f}%"
+            )
+            
+        else:
+            # NEUTRAL SCENARIO: Demand is at average
+            # Let utilization drive (becomes primary in absence of demand signal)
+            final_mult = supply_mult
+            
+            mode_explanation = (
+                f"Neutral demand, utilization-driven ({(final_mult-1)*100:+.1f}%)"
+            )
+        
+        return final_mult, mode_explanation
     
     def _generate_explanation(self, demand_mult, supply_mult, event_mult, final_mult,
                             predicted_demand, average_demand,

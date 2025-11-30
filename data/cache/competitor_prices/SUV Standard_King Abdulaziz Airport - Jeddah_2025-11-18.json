@@ -1,35 +1,35 @@
 {
-  "cached_at": "2025-11-26T16:33:36.047590",
+  "cached_at": "2025-11-27T15:41:08.567136",
   "data": {
     "competitors": [
       {
         "Competitor_Name": "Hertz",
-        "Competitor_Price": 405,
+        "Competitor_Price": 385,
         "Competitor_Category": "Standard SUV",
-        "Date": "2025-11-26 16:33",
+        "Date": "2025-11-27 15:41",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Budget",
-        "Competitor_Price": 400,
+        "Competitor_Price": 375,
         "Competitor_Category": "Standard SUV",
-        "Date": "2025-11-26 16:33",
+        "Date": "2025-11-27 15:41",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Thrifty",
-        "Competitor_Price": 400,
+        "Competitor_Price": 395,
         "Competitor_Category": "Standard SUV",
-        "Date": "2025-11-26 16:33",
+        "Date": "2025-11-27 15:41",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       }
     ],
-    "avg_price": 401.6666666666667,
+    "avg_price": 385.0,
     "competitor_count": 3,
-    "last_updated": "2025-11-26T16:33:36.047590",
+    "last_updated": "2025-11-27T15:41:08.567136",
     "location": "King Abdulaziz Airport - Jeddah",
     "category": "SUV Standard",
     "is_live": true

@@ -1,35 +1,35 @@
 {
-  "cached_at": "2025-11-26T17:21:46.182391",
+  "cached_at": "2025-11-27T15:40:59.703937",
   "data": {
     "competitors": [
       {
         "Competitor_Name": "Hertz",
-        "Competitor_Price": 190,
+        "Competitor_Price": 160,
         "Competitor_Category": "Economy",
-        "Date": "2025-11-26 17:21",
+        "Date": "2025-11-27 15:40",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Budget",
-        "Competitor_Price": 180,
+        "Competitor_Price": 155,
         "Competitor_Category": "Economy",
-        "Date": "2025-11-26 17:21",
+        "Date": "2025-11-27 15:40",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       },
       {
         "Competitor_Name": "Thrifty",
-        "Competitor_Price": 195,
+        "Competitor_Price": 160,
         "Competitor_Category": "Economy",
-        "Date": "2025-11-26 17:21",
+        "Date": "2025-11-27 15:40",
         "Source": "Live Market Intelligence",
         "Confidence": 95
       }
     ],
-    "avg_price": 188.33333333333334,
+    "avg_price": 158.33333333333334,
     "competitor_count": 3,
-    "last_updated": "2025-11-26T17:21:46.182391",
+    "last_updated": "2025-11-27T15:40:59.703937",
     "location": "King Fahd Airport - Dammam",
     "category": "Economy",
     "is_live": true
