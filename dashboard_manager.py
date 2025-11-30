@@ -20,7 +20,7 @@ from pathlib import Path
 from pricing_engine import DynamicPricingEngine
 import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
-from booking_com_api import get_api_instance
+from stored_competitor_prices import get_competitor_prices_for_branch_category, get_data_freshness
 from utilization_query import get_current_utilization
 
 # Page configuration
@@ -249,8 +249,22 @@ else:
     if comp_df is not None:
         st.sidebar.write(f"comp_df length: {len(comp_df)}")
 
-st.sidebar.markdown(f"**Model Accuracy:** 95.35%")
-st.sidebar.markdown(f"**Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+st.sidebar.markdown(f"**Model Accuracy:** 96.57% (V4 Robust)")
+
+# Competitor data freshness
+data_freshness = get_data_freshness()
+if data_freshness['available']:
+    age_hours = data_freshness.get('age_hours', 0)
+    status = data_freshness.get('status', 'Unknown')
+    
+    if age_hours < 24:
+        st.sidebar.success(f"✅ Competitor Data: {status} ({age_hours:.1f}h old)")
+    elif age_hours < 48:
+        st.sidebar.warning(f"⚠️ Competitor Data: {status} ({age_hours:.1f}h old)")
+    else:
+        st.sidebar.error(f"❌ Competitor Data: {status} ({age_hours:.1f}h old)")
+else:
+    st.sidebar.error("❌ No competitor data available. Run daily_competitor_scraper.py")
 
 # Main content - Header with Logo
 col1, col2, col3 = st.columns([1, 2, 1])
@@ -409,36 +423,12 @@ with st.spinner("Calculating optimal prices for all categories..."):
             
             pricing_results[category] = result
             
-            # Get LIVE competitor pricing for this category from Booking.com API
+            # Get competitor pricing from stored daily data
             try:
-                api = get_api_instance()
-                pick_up_date = datetime.combine(pricing_date, datetime.min.time())
-                
-                # Get all categories for this branch (API call is cached internally)
-                all_competitor_data = api.get_competitor_prices_for_dashboard(
+                comp_stats = get_competitor_prices_for_branch_category(
                     branch_name=branch_info['name'],
-                    date=pick_up_date
+                    category=category
                 )
-                
-                # Extract data for this specific category
-                if category in all_competitor_data:
-                    category_data = all_competitor_data[category]
-                    competitor_prices = [c['Competitor_Price'] for c in category_data['competitors']] if category_data['competitors'] else []
-                    comp_stats = {
-                        'avg_price': category_data['avg_price'],
-                        'min_price': min(competitor_prices) if competitor_prices else None,
-                        'max_price': max(competitor_prices) if competitor_prices else None,
-                        'competitors': category_data['competitors'],
-                        'competitor_count': len(category_data['competitors']),
-                    }
-                else:
-                    comp_stats = {
-                        'avg_price': None,
-                        'min_price': None,
-                        'max_price': None,
-                        'competitors': [],
-                        'competitor_count': 0,
-                    }
             except Exception as e:
                 st.error(f"Live pricing error: {str(e)}")
                 # Fallback to static data

@@ -43,7 +43,7 @@ class DynamicPricingEngine:
             model_path: Path to trained model (defaults to v3_final)
         """
         if model_path is None:
-            model_path = config.MODELS_DIR / 'demand_prediction_model_v3_final.pkl'
+            model_path = config.MODELS_DIR / 'demand_prediction_ROBUST_v4.pkl'
         
         logger.info("Initializing Dynamic Pricing Engine...")
         
