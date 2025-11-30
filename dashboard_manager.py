@@ -470,8 +470,12 @@ with st.spinner("Calculating optimal prices for all categories..."):
                 )
                 
                 # Convert to expected format
+                # Calculate min/max from competitors list
+                competitor_prices = [c['Competitor_Price'] for c in comp_stats_live.get('competitors', [])]
                 comp_stats = {
                     'avg_price': comp_stats_live['avg_price'],
+                    'min_price': min(competitor_prices) if competitor_prices else None,
+                    'max_price': max(competitor_prices) if competitor_prices else None,
                     'competitors': comp_stats_live['competitors'],
                     'competitor_count': comp_stats_live['competitor_count'],
                 }
