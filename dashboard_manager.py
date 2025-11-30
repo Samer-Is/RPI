@@ -20,7 +20,7 @@ from pathlib import Path
 from pricing_engine import DynamicPricingEngine
 import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
-from competitor_scraper import get_competitor_prices_for_dashboard, compare_with_competitors
+from competitor_scraper import get_competitor_prices_for_dashboard
 from utilization_query import get_current_utilization
 
 # Page configuration
