@@ -1238,6 +1238,716 @@ def validate_prediction(predicted_demand):
 
 ---
 
+## ANNEX J: TESTING & DEPLOYMENT REQUIREMENTS
+
+### **What We Need to Go Live (Production-Ready)**
+
+**1. Live Database Connection**
+
+**Current State:**
+- ✅ Read-only access to Fleet.VehicleHistory
+- ✅ Testing on production data
+- ⚠️ Using demo credentials
+
+**Production Requirements:**
+- Dedicated service account with restricted permissions
+- Connection string in secure configuration
+- Database connection pooling for performance
+- Failover to secondary database server
+- Read replica for analytics (avoid production impact)
+
+**Technical Setup:**
+```python
+# Production connection with pooling
+connection_config = {
+    'server': 'prod-sql-server.renty.sa',
+    'database': 'RentyFleet',
+    'driver': 'ODBC Driver 17 for SQL Server',
+    'service_account': 'svc_dynamic_pricing',
+    'max_connections': 10,
+    'timeout': 30,
+    'retry_attempts': 3
+}
+```
+
+**Testing Checklist:**
+- ✓ Test connection from app server to database
+- ✓ Verify query performance (<1 second)
+- ✓ Test failover to backup database
+- ✓ Validate data accuracy (compare with manual queries)
+- ✓ Load testing (50+ concurrent users)
+
+---
+
+**2. Cloud Deployment**
+
+**Current State:**
+- ⚠️ Running on local machine
+- ⚠️ No high availability
+- ⚠️ Single point of failure
+
+**Production Requirements:**
+
+**Option A: Azure (Recommended for Saudi Arabia)**
+- App Service (Streamlit dashboard hosting)
+- Azure SQL Database (if needed for caching)
+- Azure Storage (model files, logs)
+- Application Insights (monitoring)
+- Azure Active Directory (SSO integration)
+
+**Option B: AWS**
+- EC2 instance or Elastic Beanstalk
+- RDS for caching
+- S3 for storage
+- CloudWatch for monitoring
+
+**Infrastructure Needs:**
+```yaml
+Web Tier:
+  - 2× Application servers (load balanced)
+  - Auto-scaling (2-10 instances based on load)
+  - SSL certificate (HTTPS)
+  - CDN for static assets
+
+Cache Layer:
+  - Redis for session management
+  - JSON file storage for competitor data
+  - Model file caching
+
+Backup:
+  - Daily automated backups
+  - 30-day retention
+  - Disaster recovery plan
+```
+
+**Deployment Checklist:**
+- ✓ Set up cloud infrastructure
+- ✓ Configure load balancer
+- ✓ Deploy application containers
+- ✓ Configure auto-scaling rules
+- ✓ Set up monitoring dashboards
+- ✓ Configure alerts (uptime, errors, performance)
+- ✓ SSL certificate installation
+- ✓ DNS configuration (pricing.renty.sa)
+
+---
+
+**3. Integration with Booking Systems**
+
+**Current State:**
+- ⚠️ Standalone dashboard (manual price entry)
+- ⚠️ No automated price updates
+
+**Production Requirements:**
+- REST API for price recommendations
+- Integration with Renty's booking platform
+- Automated price synchronization
+- Approval workflow (optional human review)
+
+**API Endpoint Design:**
+```python
+# GET /api/v1/pricing/recommend
+POST /api/v1/pricing/recommend
+{
+    "branch_id": 122,
+    "category": "Economy",
+    "date": "2025-11-18",
+    "utilization": 0.75
+}
+
+Response:
+{
+    "base_price": 102,
+    "recommended_price": 112,
+    "multipliers": {
+        "demand": 1.0,
+        "supply": 1.1,
+        "event": 1.0
+    },
+    "explanation": "Standard pricing: Low vehicle availability",
+    "confidence": 0.965,
+    "competitor_avg": 124
+}
+```
+
+**Integration Points:**
+- Booking website (display prices)
+- Mobile app (real-time pricing)
+- Call center system (agent dashboard)
+- WhatsApp bot (automated quotes)
+
+---
+
+**4. User Access Management**
+
+**Current State:**
+- ⚠️ No authentication
+- ⚠️ Anyone with URL can access
+
+**Production Requirements:**
+
+**Role-Based Access Control:**
+```
+Role: Branch Manager
+  - View pricing for assigned branch only
+  - Cannot change base prices
+  - Can request price adjustments
+
+Role: Regional Manager
+  - View pricing for all branches in region
+  - Can approve price changes
+  - Access to performance reports
+
+Role: HQ Pricing Team
+  - Full system access
+  - Can modify base prices
+  - Can retrain models
+  - Access to admin panel
+
+Role: Executive (Read-Only)
+  - View-only dashboards
+  - Performance reports
+  - No pricing changes
+```
+
+**Authentication:**
+- Single Sign-On (SSO) with Renty Active Directory
+- Multi-factor authentication (MFA)
+- Session timeout (30 minutes idle)
+- Audit log for all actions
+
+---
+
+**5. Monitoring & Alerting**
+
+**What We Need to Monitor:**
+
+**System Health:**
+- Application uptime (target: 99.9%)
+- Response time (target: <2 seconds)
+- Database connection status
+- API availability (Booking.com)
+- Model prediction latency
+
+**Business Metrics:**
+- Prediction accuracy (target: >90%)
+- Price change frequency
+- Manager adoption rate
+- System override frequency
+- Competitor data freshness
+
+**Alerts to Configure:**
+```yaml
+Critical Alerts (Page immediately):
+  - System down > 5 minutes
+  - Database connection lost
+  - Model prediction errors > 10%
+  
+Warning Alerts (Email):
+  - Accuracy drops below 90%
+  - Competitor data > 48 hours old
+  - Unusual pricing patterns detected
+  - High error rate (>5%)
+
+Info Alerts (Dashboard):
+  - Daily system health report
+  - Weekly performance summary
+  - Monthly model accuracy report
+```
+
+**Monitoring Tools:**
+- Application Performance Monitoring (APM)
+- Log aggregation (ELK stack or Azure App Insights)
+- Custom dashboards (Grafana or Power BI)
+- Error tracking (Sentry)
+
+---
+
+**6. Performance Testing**
+
+**Load Testing Requirements:**
+
+**Concurrent Users:**
+- Test with 50 concurrent users
+- Peak load: 100 users
+- Ensure <2 second response time
+
+**Data Volume:**
+- Test with 150+ branches
+- 10,000+ vehicles
+- 365 days of historical data
+
+**Stress Testing:**
+```python
+Test Scenarios:
+1. 100 users requesting prices simultaneously
+2. API timeout (competitor data unavailable)
+3. Database connection failure
+4. Model file corruption
+5. High memory usage (large datasets)
+6. Network latency (slow DB connection)
+```
+
+**Performance Targets:**
+- Dashboard load: <2 seconds
+- Price calculation: <100ms
+- Database query: <1 second
+- API response: <500ms
+- Model prediction: <50ms per category
+
+---
+
+**7. Security Audit**
+
+**Security Checklist:**
+
+**Application Security:**
+- ✓ SQL injection prevention (parameterized queries)
+- ✓ XSS protection (Streamlit built-in)
+- ✓ HTTPS only (no HTTP)
+- ✓ API key encryption
+- ✓ No hardcoded credentials
+
+**Data Security:**
+- ✓ Read-only database access
+- ✓ No PII data exposed
+- ✓ Encrypted data transmission
+- ✓ Secure API key storage
+- ✓ Audit logging
+
+**Network Security:**
+- Firewall rules (whitelist internal IPs)
+- VPN access required for remote users
+- DDoS protection
+- Rate limiting on API endpoints
+
+**Compliance:**
+- Saudi data residency requirements
+- GDPR compliance (if applicable)
+- Internal security policies
+- Regular security audits
+
+---
+
+**8. Training & Documentation**
+
+**User Training Materials:**
+
+**For Branch Managers (2-hour session):**
+- Dashboard walkthrough
+- How to read pricing recommendations
+- When to override AI suggestions
+- Understanding competitor data
+- Event flag usage
+
+**For IT Support (4-hour session):**
+- System architecture overview
+- Troubleshooting common issues
+- Database query basics
+- Log file analysis
+- Escalation procedures
+
+**Documentation Needed:**
+- User manual (manager guide)
+- Technical documentation (IT team)
+- API documentation (integration teams)
+- Troubleshooting guide
+- FAQ document
+
+---
+
+**9. Backup & Disaster Recovery**
+
+**Backup Strategy:**
+
+**What to Backup:**
+- ML model files (daily)
+- Competitor price cache (daily)
+- Configuration files (on change)
+- System logs (continuous)
+- Application code (Git repository)
+
+**Backup Schedule:**
+```yaml
+Daily:
+  - Model files → Cloud storage
+  - Competitor data cache → S3/Azure Blob
+  - Application logs → Log retention 30 days
+
+Weekly:
+  - Full system snapshot
+  - Database backup (if caching locally)
+
+Monthly:
+  - Archive historical logs
+  - Archive model versions
+```
+
+**Disaster Recovery:**
+- Recovery Time Objective (RTO): 1 hour
+- Recovery Point Objective (RPO): 24 hours
+- Automated failover to backup region
+- Manual fallback to spreadsheet pricing (worst case)
+
+---
+
+**10. Change Management**
+
+**Rollout Strategy:**
+
+**Phase 1: Pilot (2-4 weeks)**
+- 2 branches (high activity + low activity)
+- Monitor accuracy daily
+- Gather manager feedback
+- Fine-tune based on learnings
+
+**Phase 2: Regional Rollout (1-2 months)**
+- One region at a time
+- 1 week between regions
+- Address issues before next region
+- Regional training sessions
+
+**Phase 3: Full Deployment (2-3 months)**
+- All branches enabled
+- Automated price updates
+- Manager approval workflow optional
+- Full monitoring enabled
+
+**Change Control:**
+- Weekly release cycle
+- Change approval board
+- Rollback plan for every deployment
+- Feature flags (enable/disable features without deployment)
+
+---
+
+**11. Data Refresh & Maintenance**
+
+**Automated Jobs:**
+
+**Daily (11:00 AM):**
+- Scrape competitor prices (Booking.com API)
+- Update competitor cache file
+- Validate data quality
+- Alert if API fails
+
+**Weekly (Sunday midnight):**
+- Retrain demand model with latest data
+- Update feature importance
+- Generate accuracy report
+- Archive old model version
+
+**Monthly (1st of month):**
+- Update base prices from recent rentals
+- Review and adjust pricing thresholds
+- Generate business performance report
+- Category mapping accuracy check
+
+**Quarterly (Start of quarter):**
+- Major model retrain with hyperparameter tuning
+- Add new features if available
+- Review competitor list (add/remove)
+- Strategic pricing review
+
+---
+
+**12. Integration Testing**
+
+**Test Scenarios:**
+
+**Scenario 1: Normal Day Operations**
+- Select branch → See pricing
+- All 8 categories load correctly
+- Competitor data displays
+- Utilization updates in real-time
+
+**Scenario 2: High Utilization**
+- 85% fleet rented
+- System recommends +15% premium
+- Competitor comparison shows position
+- Manager accepts recommendation
+
+**Scenario 3: Low Utilization**
+- 20% fleet rented
+- System recommends -10% discount
+- Alert: "High availability - drive demand"
+- Prices competitive with market
+
+**Scenario 4: Event Period (Hajj)**
+- Select Mecca branch
+- Enable Hajj event flag
+- System applies +30% event premium
+- Combined with utilization
+- Competitor prices 2x normal
+
+**Scenario 5: API Failure**
+- Booking.com API down
+- System uses cached data
+- Warning shown to user
+- Pricing still works
+
+**Scenario 6: Database Failure**
+- Cannot connect to Fleet.VehicleHistory
+- System uses default utilization
+- Warning shown to user
+- Pricing still works (degraded mode)
+
+---
+
+## ANNEX K: DEPLOYMENT CHECKLIST
+
+### **Pre-Deployment Requirements**
+
+**✅ Technical Setup:**
+- [ ] Cloud infrastructure provisioned (Azure/AWS)
+- [ ] Database connection configured and tested
+- [ ] SSL certificate installed (HTTPS)
+- [ ] Domain name configured (pricing.renty.sa)
+- [ ] Load balancer set up
+- [ ] Auto-scaling configured
+- [ ] Monitoring dashboards created
+- [ ] Alert rules configured
+- [ ] Backup jobs scheduled
+
+**✅ Security:**
+- [ ] Security audit completed
+- [ ] Penetration testing passed
+- [ ] API keys secured (not in code)
+- [ ] User authentication enabled (SSO)
+- [ ] Role-based access configured
+- [ ] Audit logging enabled
+- [ ] Data encryption verified
+- [ ] Compliance review passed
+
+**✅ Integration:**
+- [ ] API endpoints tested
+- [ ] Booking system integration tested
+- [ ] Mobile app integration tested
+- [ ] Call center system connected
+- [ ] Data sync verified
+
+**✅ Training:**
+- [ ] Manager training sessions completed (6 branches)
+- [ ] IT support team trained
+- [ ] User manuals distributed
+- [ ] Video tutorials recorded
+- [ ] FAQ document created
+
+**✅ Testing:**
+- [ ] Unit tests passing (100% coverage)
+- [ ] Integration tests passing
+- [ ] Load testing completed (100 users)
+- [ ] Stress testing completed
+- [ ] User acceptance testing (UAT) passed
+- [ ] Pilot results reviewed and approved
+
+**✅ Documentation:**
+- [ ] Technical documentation complete
+- [ ] User guides complete
+- [ ] API documentation complete
+- [ ] Runbook for IT support
+- [ ] Disaster recovery plan documented
+
+**✅ Business Readiness:**
+- [ ] Stakeholder sign-off
+- [ ] Pilot results presented
+- [ ] Manager feedback incorporated
+- [ ] Change management plan approved
+- [ ] Communication plan for branches
+
+---
+
+### **Deployment Timeline (Recommended)**
+
+**Week 1-2: Infrastructure Setup**
+- Cloud environment provisioned
+- Database connections configured
+- SSL and domain setup
+- Monitoring tools deployed
+
+**Week 3-4: Security & Integration**
+- Security audit and fixes
+- SSO integration
+- API development
+- Integration testing
+
+**Week 5-6: User Preparation**
+- Training sessions (all branches)
+- User manuals distributed
+- Support desk briefing
+- Pilot branch selection
+
+**Week 7-8: Pilot Launch**
+- 2 branches go live
+- Daily monitoring
+- Quick issue resolution
+- Feedback collection
+
+**Week 9-10: Pilot Review**
+- Analyze pilot results
+- Make adjustments
+- Get final approval
+- Plan full rollout
+
+**Week 11-16: Full Rollout**
+- Region-by-region deployment
+- 1-2 weeks between regions
+- Continuous support
+- Feedback loops
+
+**Total Timeline: 3-4 months** (no tight deadline - quality first)
+
+---
+
+### **Infrastructure Requirements**
+
+**Cloud Resources Needed:**
+
+**Compute:**
+- 2× App servers (4 vCPU, 16GB RAM each)
+- Load balancer
+- Auto-scaling group (2-10 instances)
+
+**Storage:**
+- 100GB SSD for application
+- 500GB for logs and backups
+- Blob storage for model files
+
+**Database:**
+- Existing SQL Server (read-only access)
+- Optional: Redis cache for sessions
+
+**Networking:**
+- Virtual private network (VPN)
+- Public IP with firewall
+- CDN for static assets (optional)
+
+**Cost Estimate:**
+- Azure: ~$500-800/month
+- AWS: ~$600-900/month
+- Includes: Servers, storage, bandwidth, monitoring
+
+---
+
+### **API & External Dependencies**
+
+**1. Booking.com API:**
+- Current plan: Limited requests
+- Production: Upgrade to higher tier if needed
+- Backup: Kayak API (if Booking.com fails)
+- Monitoring: Track API quota usage
+
+**2. Database Connection:**
+- Primary: Production SQL Server
+- Backup: Read replica
+- Failover: Automatic (5-second downtime max)
+
+**3. Model Storage:**
+- Primary: Local file system
+- Backup: Cloud storage (S3/Azure Blob)
+- Version control: Git + cloud backup
+
+---
+
+### **Support & Maintenance Plan**
+
+**Daily:**
+- Monitor system health
+- Check competitor data updates
+- Review error logs
+- Respond to user issues
+
+**Weekly:**
+- Model accuracy review
+- Performance metrics
+- User feedback review
+- System optimization
+
+**Monthly:**
+- Model retraining
+- Base price updates
+- Category mapping review
+- Feature releases
+
+**Quarterly:**
+- Major updates
+- Security audits
+- User satisfaction survey
+- Roadmap review
+
+---
+
+### **Success Metrics for Launch**
+
+**Technical Metrics:**
+- System uptime: >99%
+- Response time: <2 seconds
+- Error rate: <1%
+- API success rate: >95%
+
+**Business Metrics:**
+- Manager adoption: >80% in first month
+- Prediction accuracy: >90%
+- Competitor data coverage: 6+ branches
+- User satisfaction: >4/5 rating
+
+**Operational Metrics:**
+- Support tickets: <5 per week
+- System overrides: <20% of recommendations
+- Training completion: 100% of managers
+- Documentation usage: >50% of users
+
+---
+
+### **Risk Mitigation**
+
+**Technical Risks:**
+
+| Risk | Impact | Mitigation | Owner |
+|------|--------|------------|-------|
+| Database downtime | HIGH | Failover + cached data | IT Ops |
+| API quota exceeded | MEDIUM | Multiple API providers | Dev Team |
+| Model accuracy drops | MEDIUM | Weekly monitoring + alerts | Data Team |
+| System overload | LOW | Auto-scaling + load testing | DevOps |
+| Security breach | HIGH | Audit + penetration testing | Security |
+
+**Business Risks:**
+
+| Risk | Impact | Mitigation | Owner |
+|------|--------|------------|-------|
+| Manager resistance | HIGH | Training + gradual rollout | Change Mgmt |
+| Incorrect pricing | MEDIUM | Human approval workflow | Pricing Team |
+| Competitor response | LOW | Monitor market + stay agile | Strategy |
+| System dependency | MEDIUM | Manual fallback plan | Operations |
+
+---
+
+### **Go/No-Go Decision Criteria**
+
+**Before Production Launch, ALL Must Be ✅:**
+
+**Critical (Blockers):**
+- [ ] Database connection stable (99%+ uptime in testing)
+- [ ] Security audit passed (no critical issues)
+- [ ] Pilot results positive (accuracy >90%)
+- [ ] Stakeholder approval received
+- [ ] Support team trained and ready
+
+**Important (Strongly Recommended):**
+- [ ] Cloud infrastructure ready
+- [ ] Monitoring dashboards operational
+- [ ] User training completed
+- [ ] Documentation complete
+- [ ] Backup and recovery tested
+
+**Nice-to-Have (Can Be Added Later):**
+- [ ] API integration with booking system
+- [ ] Mobile app optimization
+- [ ] Advanced reporting dashboards
+- [ ] A/B testing framework
+
+---
+
 **END OF TECHNICAL ANNEX**
 
 *These slides provide deep technical details for stakeholders who want to understand the "how" behind the system.*
