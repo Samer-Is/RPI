@@ -81,7 +81,7 @@ st.markdown("""
         padding: 0.4rem;
         border-radius: 0.4rem;
         margin-top: 0.4rem;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
         min-height: 100px;
         max-height: 120px;
         overflow-y: auto;
@@ -513,9 +513,9 @@ with st.spinner("Calculating optimal prices for all categories..."):
                     # Build complete card HTML
                     card_html = f"""<div class="category-card">
                         <h3 style="color: #003d82; margin: 0 0 0.25rem 0; font-size: 1.1rem;">{details['icon']} {category}</h3>
-                        <p style="font-size: 0.75rem; color: #6c757d; margin: 0;">{details['examples']}</p>
+                        <p style="font-size: 0.85rem; color: #6c757d; margin: 0;">{details['examples']}</p>
                         <hr style="margin: 0.5rem 0;">
-                        <p style="font-size: 0.75rem; color: #6c757d; text-decoration: line-through; margin: 0.25rem 0;">
+                        <p style="font-size: 0.85rem; color: #6c757d; text-decoration: line-through; margin: 0.25rem 0;">
                             Base: {result['base_price']:.0f} SAR/day
                         </p>
                         <h2 style="color: #1f77b4; margin: 0.25rem 0; font-size: 1.5rem;">
@@ -538,7 +538,7 @@ with st.spinner("Calculating optimal prices for all categories..."):
                         comp_list_html = ""
                         comp_timestamp = ""
                         for comp in comp_stats['competitors']:
-                            comp_list_html += f"<div style='font-size: 0.65rem; color: #495057; margin-top: 0.1rem;'>• {comp['Competitor_Name']}: {comp['Competitor_Price']} SAR</div>"
+                            comp_list_html += f"<div style='font-size: 0.75rem; color: #495057; margin-top: 0.1rem;'>• {comp['Competitor_Name']}: {comp['Competitor_Price']} SAR</div>"
                             if not comp_timestamp and 'Date' in comp:
                                 comp_timestamp = comp['Date']
                         
@@ -550,12 +550,12 @@ with st.spinner("Calculating optimal prices for all categories..."):
                                 <strong>Competitor Avg:</strong> {comp_avg:.0f} SAR/day
                             </div>
                             {comp_list_html}
-                            <div style="color: #6c757d; font-size: 0.65rem; margin-top: 0.2rem;">
+                            <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.2rem;">
                                 🔄 Live: {comp_timestamp}
                             </div>
                         </div>"""
                     else:
-                        card_html += """<div class="competitor-section" style="color: #6c757d;">
+                        card_html += """<div class="competitor-section" style="color: #6c757d; font-size: 0.8rem;">
                             No competitor data available
                         </div>"""
                     
@@ -591,9 +591,9 @@ with st.spinner("Calculating optimal prices for all categories..."):
                     # Build complete card HTML
                     card_html = f"""<div class="category-card">
                         <h3 style="color: #003d82; margin: 0 0 0.25rem 0; font-size: 1.1rem;">{details['icon']} {category}</h3>
-                        <p style="font-size: 0.75rem; color: #6c757d; margin: 0;">{details['examples']}</p>
+                        <p style="font-size: 0.85rem; color: #6c757d; margin: 0;">{details['examples']}</p>
                         <hr style="margin: 0.5rem 0;">
-                        <p style="font-size: 0.75rem; color: #6c757d; text-decoration: line-through; margin: 0.25rem 0;">
+                        <p style="font-size: 0.85rem; color: #6c757d; text-decoration: line-through; margin: 0.25rem 0;">
                             Base: {result['base_price']:.0f} SAR/day
                         </p>
                         <h2 style="color: #1f77b4; margin: 0.25rem 0; font-size: 1.5rem;">
@@ -616,7 +616,7 @@ with st.spinner("Calculating optimal prices for all categories..."):
                         comp_list_html = ""
                         comp_timestamp = ""
                         for comp in comp_stats['competitors']:
-                            comp_list_html += f"<div style='font-size: 0.65rem; color: #495057; margin-top: 0.1rem;'>• {comp['Competitor_Name']}: {comp['Competitor_Price']} SAR</div>"
+                            comp_list_html += f"<div style='font-size: 0.75rem; color: #495057; margin-top: 0.1rem;'>• {comp['Competitor_Name']}: {comp['Competitor_Price']} SAR</div>"
                             if not comp_timestamp and 'Date' in comp:
                                 comp_timestamp = comp['Date']
                         
@@ -628,12 +628,12 @@ with st.spinner("Calculating optimal prices for all categories..."):
                                 <strong>Competitor Avg:</strong> {comp_avg:.0f} SAR/day
                             </div>
                             {comp_list_html}
-                            <div style="color: #6c757d; font-size: 0.65rem; margin-top: 0.2rem;">
+                            <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.2rem;">
                                 🔄 Live: {comp_timestamp}
                             </div>
                         </div>"""
                     else:
-                        card_html += """<div class="competitor-section" style="color: #6c757d;">
+                        card_html += """<div class="competitor-section" style="color: #6c757d; font-size: 0.8rem;">
                             No competitor data available
                         </div>"""
                     
