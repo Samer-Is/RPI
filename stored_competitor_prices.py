@@ -10,8 +10,8 @@ from typing import Dict, Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Path to stored data file (using Kayak data now)
-DATA_FILE = "data/competitor_prices/daily_kayak_prices.json"
+# Path to stored data file (using Booking.com data)
+DATA_FILE = "data/competitor_prices/daily_competitor_prices.json"
 
 # Cache the loaded data in memory
 _cached_data = None
