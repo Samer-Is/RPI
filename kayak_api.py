@@ -207,8 +207,8 @@ class KayakAPI:
                 provider = providers[0]
                 vehicle_detail = provider.get('vehicleDetail', {})
                 
-                vehicle_name = vehicle_detail.get('brand', 'Unknown')
-                kayak_category = vehicle_detail.get('localizedCarClassName', 'Unknown')
+                vehicle_name = vehicle_detail.get('brand', 'Unknown').strip()
+                kayak_category = vehicle_detail.get('localizedCarClassName', 'Unknown').strip()
                 
                 # Get price
                 day_price = provider.get('dayPrice', 0)
