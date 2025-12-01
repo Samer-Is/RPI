@@ -842,17 +842,17 @@ with st.spinner("Calculating optimal prices for all categories..."):
         
         st.plotly_chart(fig, use_container_width=True)
         
-        # Summary stats
+        # Summary stats - based on chart categories only
         col1, col2, col3 = st.columns(3)
         
-        cheaper_count = sum(1 for r, c in zip(renty_prices, competitor_avgs) if r < c)
-        avg_diff = sum(r - c for r, c in zip(renty_prices, competitor_avgs)) / len(renty_prices)
+        cheaper_count = sum(1 for r, c in zip(chart_renty_prices, chart_competitor_avgs) if r < c)
+        avg_diff = sum(r - c for r, c in zip(chart_renty_prices, chart_competitor_avgs)) / len(chart_renty_prices) if chart_renty_prices else 0
         
         with col1:
-            st.metric("Categories Cheaper", f"{cheaper_count}/{len(categories)}")
+            st.metric("Categories Cheaper", f"{cheaper_count}/{len(chart_category_labels)}")
         
         with col2:
-            st.metric("Categories More Expensive", f"{len(categories) - cheaper_count}/{len(categories)}")
+            st.metric("Categories More Expensive", f"{len(chart_category_labels) - cheaper_count}/{len(chart_category_labels)}")
         
         with col3:
             st.metric("Avg Price Difference", f"{avg_diff:+.0f} SAR")
