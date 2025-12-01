@@ -30,11 +30,11 @@ class KayakAPI:
             "King Khalid Airport - Riyadh": "RUH::airport",
             "Olaya District - Riyadh": "35744::city",
             "King Abdulaziz Airport - Jeddah": "JED::airport",
-            "Jeddah City Center": "21838::city",
+            "Jeddah City Center": "17976::city",  # Fixed: was 21838
             "King Fahd Airport - Dammam": "DMM::airport",
-            "Al Khobar Business District": "39553::city",
-            "Mecca City Center": "21852::city",
-            "Medina Downtown": "21857::city"
+            "Al Khobar Business District": "33765::city",  # Fixed: was 39553
+            "Mecca City Center": "7523::city",  # Fixed: was 21852
+            "Medina Downtown": "45635::city"  # Fixed: was 21857
         }
         
         # Kayak categories to Renty categories mapping
