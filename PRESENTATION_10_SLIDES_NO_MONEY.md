@@ -435,6 +435,131 @@ GROUP BY BranchId
 - 154 = Long-term Rental
 - 155 = Contracted
 
+### **2. Fleet.Vehicles Table**
+**Purpose:** Vehicle master data and branch assignments
+
+**Key Columns Used:**
+- `VehicleId` - Unique vehicle identifier
+- `BranchId` - Current branch assignment
+- `ModelId` - Link to vehicle model
+- `IsActive` - Whether vehicle is in active fleet
+- `RegistrationNumber` - Vehicle plate number
+
+**Query Logic:**
+```sql
+-- Get total active vehicles per branch
+SELECT 
+    BranchId,
+    COUNT(*) as TotalVehicles
+FROM Fleet.Vehicles
+WHERE IsActive = 1
+GROUP BY BranchId
+ORDER BY BranchId
+```
+
+**Used For:**
+- Total fleet size per branch
+- Vehicle availability calculations
+- Active vs. inactive vehicle filtering
+
+### **3. Fleet.Models Table**
+**Purpose:** Vehicle model specifications and categories
+
+**Key Columns Used:**
+- `ModelId` - Unique model identifier
+- `CategoryId` - Vehicle category
+- `CategoryName` - Category name (Economy, Compact, etc.)
+- `ModelName` - Vehicle model (e.g., "Toyota Camry")
+- `Brand` - Manufacturer
+- `Year` - Model year
+
+**Query Logic:**
+```sql
+-- Get model categories for pricing
+SELECT 
+    m.ModelId,
+    m.ModelName,
+    m.CategoryName,
+    m.Brand
+FROM Fleet.Models m
+WHERE m.IsActive = 1
+```
+
+**Used For:**
+- Category classification
+- Base price lookup
+- Vehicle specifications
+
+### **4. Rental.Contract Table**
+**Purpose:** Booking history and pricing data
+
+**Key Columns Used:**
+- `ContractId` - Unique rental contract
+- `VehicleId` - Rented vehicle
+- `BranchId` - Rental branch
+- `StartDate` - Rental start date
+- `EndDate` - Rental end date
+- `DailyPrice` - Actual daily rate charged
+- `TotalPrice` - Total rental amount
+- `ContractDate` - When contract was created
+- `Status` - Contract status
+
+**Query Logic:**
+```sql
+-- Get recent rental prices by category (for base prices)
+SELECT 
+    m.CategoryName,
+    AVG(c.DailyPrice) as AvgDailyPrice,
+    MAX(c.DailyPrice) as MaxDailyPrice,
+    MIN(c.DailyPrice) as MinDailyPrice,
+    COUNT(*) as TotalRentals
+FROM Rental.Contract c
+INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.VehicleId
+INNER JOIN Fleet.Models m ON v.ModelId = m.ModelId
+WHERE c.StartDate >= DATEADD(day, -30, GETDATE())
+  AND c.Status = 'Completed'
+  AND c.DailyPrice > 0
+GROUP BY m.CategoryName
+ORDER BY m.CategoryName
+```
+
+**Used For:**
+- Base price determination (last rental prices)
+- Historical demand patterns
+- ML model training data
+- Price trend analysis
+
+### **5. Training Data Generation**
+
+**Combined Query for ML Training:**
+```sql
+-- Generate training dataset with all features
+SELECT 
+    c.ContractDate as Date,
+    c.BranchId,
+    c.VehicleId,
+    v.ModelId,
+    m.CategoryName,
+    c.DailyPrice,
+    c.StartDate,
+    c.EndDate,
+    DATEDIFF(day, c.StartDate, c.EndDate) as RentalDuration,
+    DATEPART(weekday, c.StartDate) as DayOfWeek,
+    DATEPART(month, c.StartDate) as Month,
+    -- Count bookings per day for demand
+    COUNT(*) OVER (
+        PARTITION BY c.BranchId, CAST(c.StartDate AS DATE)
+    ) as DailyDemand
+FROM Rental.Contract c
+INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.VehicleId
+INNER JOIN Fleet.Models m ON v.ModelId = m.ModelId
+WHERE c.ContractDate >= DATEADD(day, -180, GETDATE())
+  AND c.Status = 'Completed'
+ORDER BY c.ContractDate
+```
+
+**This generates 50,000+ training records across 180 days**
+
 ---
 
 ## ANNEX B: AI ALGORITHM DETAILS
