@@ -228,9 +228,8 @@ class PricingRules:
         if is_weekend:
             multiplier *= 1.05  # 5% premium
         
-        # AIRPORT PREMIUM
-        if is_airport:
-            multiplier *= 1.10  # 10% airport premium
+        # AIRPORT PREMIUM - REMOVED
+        # Let demand/supply drive pricing naturally (no hardcoded markup)
         
         # Cap the multiplier (higher cap for extreme cases like Hajj in Mecca)
         multiplier = min(multiplier, 1.60)  # Max 60% for extreme combinations
@@ -364,8 +363,6 @@ class PricingRules:
             reasons.append("Umrah season")
         if is_weekend:
             reasons.append("Weekend")
-        if is_airport:
-            reasons.append("Airport location")
         
         # Final verdict
         if final_mult > 1.30:
