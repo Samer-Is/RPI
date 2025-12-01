@@ -79,38 +79,50 @@ class KayakAPI:
     
     def _map_to_renty_category_price_aware(self, vehicle_name: str, kayak_category: str, price_per_day: float) -> str:
         """
-        Map Kayak category to Renty category with price-awareness.
-        Only LUXURY BRANDS at high prices go to Luxury categories.
-        Regular brands stay in size-based categories regardless of price.
+        Map Kayak category to Renty category using car model database first.
+        The car_model_category_mapping.py has the most accurate mappings.
         """
-        # Get initial category from standard mapping
-        initial_category = self._map_to_renty_category(vehicle_name, kayak_category)
+        # Use the car model database - it's the most accurate
+        renty_cat = get_correct_category(vehicle_name, kayak_category)
         
-        # Check if this is a luxury brand
-        luxury_brands = ['BMW', 'MERCEDES', 'AUDI', 'LEXUS', 'PORSCHE', 'JAGUAR', 'LAND ROVER', 'RANGE ROVER', 'CADILLAC', 'INFINITI']
-        is_luxury_brand = any(brand in vehicle_name.upper() for brand in luxury_brands)
+        if renty_cat != "Unknown":
+            return renty_cat
         
-        # Price threshold for luxury classification (only applies to luxury brands)
-        LUXURY_PRICE_THRESHOLD = 800  # SAR/day
+        # If not in database, use category mapping
+        for renty_category, kayak_categories in self.category_mapping.items():
+            if kayak_category in kayak_categories:
+                return renty_category
         
-        # If it's a luxury brand AND price is high, upgrade to luxury category
-        if is_luxury_brand and price_per_day >= LUXURY_PRICE_THRESHOLD:
-            # Check if vehicle is an SUV
-            is_suv = any(x in vehicle_name.upper() for x in [
-                'SUV', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7',
-                'GLC', 'GLE', 'GLS', 'GLB', 'GLK',
-                'Q3', 'Q5', 'Q7', 'Q8',
-                'CAYENNE', 'MACAN',
-                'RX', 'NX', 'LX', 'GX'  # Lexus SUVs
-            ]) or 'SUV' in initial_category
-            
-            if is_suv:
-                return "Luxury SUV"
+        # Smart fallback based on keywords
+        vehicle_upper = vehicle_name.upper()
+        
+        # Check for SUVs
+        if any(x in vehicle_upper for x in ['SUV', 'X-TRAIL', 'RAV4', 'TUCSON', 'SPORTAGE', 'CRETA', 'KONA', 'QASHQAI']):
+            # Small/Compact SUVs
+            if any(x in kayak_category.lower() for x in ['compact', 'small']):
+                return "SUV Compact"
+            # Large SUVs
+            elif any(x in vehicle_upper for x in ['LAND CRUISER', 'HIGHLANDER', 'PATROL', 'TAHOE', 'YUKON', 'SUBURBAN']):
+                return "SUV Large"
+            # Standard SUVs
             else:
-                return "Luxury Sedan"
+                return "SUV Standard"
         
-        # For non-luxury brands OR low-priced luxury brands, keep initial category
-        return initial_category
+        # Check for luxury brands (sedans)
+        if any(x in vehicle_upper for x in ['BMW', 'MERCEDES', 'AUDI', 'LEXUS']) and 'SUV' not in vehicle_upper:
+            return "Luxury Sedan"
+        
+        # Check for pickup trucks
+        if 'HILUX' in vehicle_upper or 'PICKUP' in vehicle_upper or 'pickup' in kayak_category.lower():
+            return "Standard"
+        
+        # Default by Kayak category
+        if kayak_category in ['Mini', 'Economy']:
+            return "Economy"
+        elif kayak_category == 'Compact':
+            return "Compact"
+        else:
+            return "Standard"
     
     def search_cars(self, branch_name: str, pickup_date: date, dropoff_date: date) -> Dict[str, List[Dict]]:
         """
