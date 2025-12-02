@@ -857,6 +857,134 @@ with st.spinner("Calculating optimal prices for all categories..."):
         with col3:
             st.metric("Avg Price Difference", f"{avg_diff:+.0f} SAR")
 
+# =====================================================
+# CAR MODEL PRICE COMPARISON SECTION
+# =====================================================
+st.markdown("---")
+st.markdown("## 🚗 Car-by-Car Price Comparison")
+st.markdown(f"*Exact vehicle model matches between Renty and competitors*")
+
+# Import car model matcher
+from car_model_matcher import find_matching_vehicles, get_best_matches_per_model
+
+# Get base prices for matching
+base_prices_for_matching = {
+    cat: pricing_results[cat]['base_price'] 
+    for cat in pricing_results.keys()
+}
+
+# Get competitor data in the right format
+competitor_data_for_matching = {}
+for cat, data in competitor_data.items():
+    if data.get('stats') and data['stats'].get('competitors'):
+        competitor_data_for_matching[cat] = {
+            'competitors': data['stats']['competitors']
+        }
+
+# Find matching vehicles
+all_matches = find_matching_vehicles(competitor_data_for_matching, base_prices_for_matching)
+model_matches = get_best_matches_per_model(all_matches)
+
+if model_matches:
+    # Display matches in a grid
+    st.markdown(f"**Found {len(all_matches)} matches across {len(model_matches)} Renty models**")
+    
+    # Create columns for cards
+    cols_per_row = 3
+    models_list = list(model_matches.items())
+    
+    for row_start in range(0, len(models_list), cols_per_row):
+        cols = st.columns(cols_per_row)
+        
+        for col_idx, col in enumerate(cols):
+            if row_start + col_idx < len(models_list):
+                renty_model, matches = models_list[row_start + col_idx]
+                
+                if matches:
+                    first_match = matches[0]
+                    renty_price = first_match['renty_base_price']
+                    category = first_match['renty_category']
+                    
+                    # Calculate best competitor price
+                    best_competitor_price = min(m['competitor_price'] for m in matches)
+                    price_diff = renty_price - best_competitor_price
+                    
+                    # Determine status color
+                    if price_diff < 0:
+                        status_color = "#28a745"  # Green - cheaper
+                        status_text = "CHEAPER"
+                        diff_text = f"-{abs(price_diff):.0f} SAR"
+                    else:
+                        status_color = "#dc3545"  # Red - more expensive
+                        status_text = "MORE"
+                        diff_text = f"+{abs(price_diff):.0f} SAR"
+                    
+                    with col:
+                        st.markdown(f"""
+                        <div style="
+                            border: 2px solid {status_color};
+                            border-radius: 10px;
+                            padding: 15px;
+                            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                            margin-bottom: 10px;
+                            min-height: 200px;
+                        ">
+                            <div style="
+                                font-size: 1.1rem;
+                                font-weight: bold;
+                                color: #4fc3f7;
+                                margin-bottom: 5px;
+                            ">🚙 {renty_model}</div>
+                            <div style="
+                                font-size: 0.85rem;
+                                color: #90a4ae;
+                                margin-bottom: 10px;
+                            ">{category}</div>
+                            <div style="
+                                display: flex;
+                                justify-content: space-between;
+                                margin-bottom: 10px;
+                            ">
+                                <div>
+                                    <span style="color: #90a4ae; font-size: 0.8rem;">Renty:</span><br/>
+                                    <span style="color: white; font-size: 1.2rem; font-weight: bold;">{renty_price:.0f} SAR</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="color: #90a4ae; font-size: 0.8rem;">Best Competitor:</span><br/>
+                                    <span style="color: #ffb74d; font-size: 1.2rem; font-weight: bold;">{best_competitor_price:.0f} SAR</span>
+                                </div>
+                            </div>
+                            <div style="
+                                text-align: center;
+                                padding: 8px;
+                                background: {status_color}22;
+                                border-radius: 5px;
+                                color: {status_color};
+                                font-weight: bold;
+                                font-size: 0.95rem;
+                            ">{status_text} {diff_text}</div>
+                            <div style="
+                                margin-top: 10px;
+                                font-size: 0.75rem;
+                                color: #78909c;
+                                max-height: 60px;
+                                overflow-y: auto;
+                            ">
+                        """, unsafe_allow_html=True)
+                        
+                        # Show competitor details
+                        comp_details = "<br/>".join([
+                            f"• {m['competitor_supplier']}: {m['competitor_price']:.0f} SAR" 
+                            for m in matches[:3]
+                        ])
+                        st.markdown(f"""
+                            {comp_details}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+else:
+    st.info("No exact car model matches found between Renty fleet and competitor data.")
+
 # Footer
 st.markdown("---")
 st.markdown("""
