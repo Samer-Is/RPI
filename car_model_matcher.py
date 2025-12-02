@@ -12,9 +12,9 @@ RENTY_FLEET = {
     "Economy": [
         {"model": "Hyundai Accent", "brand": "Hyundai"},
         {"model": "Kia Picanto", "brand": "Kia"},
-        {"model": "Nissan Sunny", "brand": "Nissan"},
         {"model": "Chevrolet Spark", "brand": "Chevrolet"},
         {"model": "Hyundai i10", "brand": "Hyundai"},
+        {"model": "Geely GX3 Pro", "brand": "Geely"},
     ],
     "Compact": [
         {"model": "Toyota Yaris", "brand": "Toyota"},
@@ -163,6 +163,8 @@ def find_matching_vehicles(competitor_data: Dict, renty_base_prices: Dict) -> Li
                     match_type = f"similarity_{similarity:.0%}"
                 
                 if is_match:
+                    # price_diff = Renty - Competitor
+                    # Negative means Renty is CHEAPER, Positive means Renty is MORE EXPENSIVE
                     price_diff = base_price - comp_vehicle['price'] if base_price > 0 else 0
                     price_diff_pct = (price_diff / comp_vehicle['price'] * 100) if comp_vehicle['price'] > 0 else 0
                     
@@ -177,7 +179,7 @@ def find_matching_vehicles(competitor_data: Dict, renty_base_prices: Dict) -> Li
                         'match_type': match_type,
                         'price_difference': round(price_diff, 2),
                         'price_difference_pct': round(price_diff_pct, 1),
-                        'is_cheaper': price_diff > 0
+                        'is_cheaper': price_diff < 0  # Renty is cheaper when Renty < Competitor
                     })
     
     # Remove duplicates (same Renty model + same competitor)
