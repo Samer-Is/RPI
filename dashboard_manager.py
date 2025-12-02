@@ -285,149 +285,106 @@ if st.sidebar.button("🔄 Refresh Competitor Data"):
     clear_cache()
     st.rerun()
 
-# Main content - Header with Logo
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image("Gemini_Generated_Image_qzl79lqzl79lqzl7.png", use_column_width=True)
-    st.markdown('<p class="main-header">Intelligent Dynamic Pricing</p>', unsafe_allow_html=True)
-    st.info(f"👋 Welcome, **{user_role}**! Manage pricing for **{branch_info['name']}**")
+st.sidebar.markdown("---")
 
-st.markdown("---")
+# =====================================================
+# SIDEBAR: Date & Events Section
+# =====================================================
+st.sidebar.markdown("### 📅 Date & Events")
 
-# Date and condition selectors - COMPACT
-st.markdown("### 📅 Date & Events")
+pricing_date = st.sidebar.date_input(
+    "Pricing Date",
+    value=date(2025, 11, 18),
+    min_value=date(2023, 1, 1),
+    max_value=date(2025, 11, 18),
+    help="Pricing date"
+)
 
-col1, col2, col3 = st.columns([2, 3, 3])
-
-with col1:
-    pricing_date = st.date_input(
-        "Pricing Date",
-        value=date(2025, 11, 18),
-        min_value=date(2023, 1, 1),
-        max_value=date(2025, 11, 18),
-        help="Pricing date"
-    )
-    is_weekend = st.checkbox("📅 Weekend", value=False, help="Friday-Saturday")
-
-with col2:
-    st.markdown("**Religious Events**")
-    is_holiday = st.checkbox("🎉 Holiday", value=False, help="Eid, National Day")
-    is_ramadan = st.checkbox("🌙 Ramadan", value=False, help="Ramadan")
-    is_umrah_season = st.checkbox("🕋 Umrah", value=False, help="Umrah season")
-    is_hajj = st.checkbox("🕌 Hajj", value=False, help="Hajj season")
-
-with col3:
-    st.markdown("**Other Events**")
-    is_school_vacation = st.checkbox("🏖️ Vacation", value=False, help="School vacation")
-    is_festival = st.checkbox("🎪 Festival", value=False, help="Riyadh/Jeddah Season")
-    is_sports_event = st.checkbox("🏎️ Sports", value=False, help="Formula 1")
-    is_conference = st.checkbox("💼 Business", value=False, help="Conferences")
+st.sidebar.markdown("**Events:**")
+col_ev1, col_ev2 = st.sidebar.columns(2)
+with col_ev1:
+    is_weekend = st.checkbox("📅 Weekend", value=False)
+    is_holiday = st.checkbox("🎉 Holiday", value=False)
+    is_ramadan = st.checkbox("🌙 Ramadan", value=False)
+    is_umrah_season = st.checkbox("🕋 Umrah", value=False)
+with col_ev2:
+    is_hajj = st.checkbox("🕌 Hajj", value=False)
+    is_school_vacation = st.checkbox("🏖️ Vacation", value=False)
+    is_festival = st.checkbox("🎪 Festival", value=False)
+    is_sports_event = st.checkbox("🏎️ Sports", value=False)
+    is_conference = st.checkbox("💼 Business", value=False)
 
 # Combine events for pricing engine (backwards compatibility)
 is_major_event = is_festival or is_sports_event or is_conference or is_hajj
 
-# Show active events warning
+# Show active events in sidebar
 active_events = []
-if is_holiday:
-    active_events.append("🎉 Holiday")
-if is_ramadan:
-    active_events.append("🌙 Ramadan")
-if is_umrah_season:
-    active_events.append("🕋 Umrah")
-if is_hajj:
-    active_events.append("🕌 Hajj")
-if is_school_vacation:
-    active_events.append("🏖️ Vacation")
-if is_festival:
-    active_events.append("🎪 Festival")
-if is_sports_event:
-    active_events.append("🏎️ Sports")
-if is_conference:
-    active_events.append("💼 Business")
+if is_holiday: active_events.append("Holiday")
+if is_ramadan: active_events.append("Ramadan")
+if is_umrah_season: active_events.append("Umrah")
+if is_hajj: active_events.append("Hajj")
+if is_school_vacation: active_events.append("Vacation")
+if is_festival: active_events.append("Festival")
+if is_sports_event: active_events.append("Sports")
+if is_conference: active_events.append("Business")
 
 if active_events:
-    st.warning(f"⚠️ **EVENTS ACTIVE:** {', '.join(active_events)} - This will apply PREMIUM pricing!")
-    if st.button("🔄 Reset to Normal Day"):
-        st.rerun()
+    st.sidebar.warning(f"⚠️ PREMIUM: {', '.join(active_events)}")
 else:
-    st.success("✓ Normal Day (No events) - Pricing based on demand and utilization only")
+    st.sidebar.success("✓ Normal Day")
 
-# Fleet utilization
-st.markdown("### 🚗 Fleet Status")
+st.sidebar.markdown("---")
 
-# Toggle between manual and real-time
-utilization_mode = st.radio(
-    "Utilization Mode",
-    ["Manual (Demo)", "Real-time (Database)"],
-    help="Manual: Use inputs for testing. Real-time: Query Fleet.VehicleHistory"
+# =====================================================
+# SIDEBAR: Fleet Status Section
+# =====================================================
+st.sidebar.markdown("### 🚗 Fleet Status")
+
+utilization_mode = st.sidebar.radio(
+    "Mode",
+    ["Real-time (DB)", "Manual"],
+    help="Real-time: Query database. Manual: Demo mode"
 )
 
-if utilization_mode == "Real-time (Database)":
-    # Query database - NO CACHING, query every time branch changes
-    with st.spinner(f"Querying Fleet.VehicleHistory for Branch {st.session_state.selected_branch}..."):
-        util_data = get_current_utilization(
-            branch_id=st.session_state.selected_branch,
-            date=pricing_date
-        )
+if utilization_mode == "Real-time (DB)":
+    util_data = get_current_utilization(
+        branch_id=st.session_state.selected_branch,
+        date=pricing_date
+    )
     
     total_vehicles = util_data['total_vehicles']
     rented_vehicles = util_data['rented_vehicles']
     available_vehicles = util_data['available_vehicles']
     utilization_pct = util_data['utilization_pct']
     
-    # Show data source and branch info
     if util_data['source'] == 'database':
-        st.success(f"✓ Real-time: {rented_vehicles}/{total_vehicles} rented ({utilization_pct:.1f}%)")
-        st.info(f"**Source:** Fleet.VehicleHistory | **Branch ID:** {st.session_state.selected_branch} | **Date:** {pricing_date.strftime('%Y-%m-%d')}")
+        st.sidebar.success(f"✓ {rented_vehicles}/{total_vehicles} ({utilization_pct:.1f}%)")
     else:
-        st.warning(f"⚠ No data for branch {st.session_state.selected_branch} - Using defaults: {rented_vehicles}/{total_vehicles}")
-        if 'error' in util_data:
-            st.error(f"Error: {util_data['error']}")
+        st.sidebar.warning(f"⚠ No data - defaults")
 else:
-    # Manual inputs (demo mode)
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        total_vehicles = st.number_input(
-            "Total Fleet Size",
-            min_value=10,
-            max_value=500,
-            value=100,
-            help="Total vehicles in your branch"
-        )
-
-    with col2:
-        rented_vehicles = st.slider(
-            "Currently Rented Vehicles",
-            min_value=0,
-            max_value=int(total_vehicles),
-            value=int(total_vehicles * 0.5),
-            help="Number of vehicles currently rented out"
-        )
-
+    total_vehicles = st.sidebar.number_input("Fleet Size", 10, 500, 100)
+    rented_vehicles = st.sidebar.slider("Rented", 0, int(total_vehicles), int(total_vehicles * 0.5))
     utilization_pct = (rented_vehicles / total_vehicles * 100) if total_vehicles > 0 else 0
     available_vehicles = total_vehicles - rented_vehicles
 
-col1, col2, col3 = st.columns(3)
-with col3:
-    
-    if utilization_pct < 30:
-        color = "🟢"
-        status = "Low Utilization"
-    elif utilization_pct < 70:
-        color = "🟡"
-        status = "Medium Utilization"
-    else:
-        color = "🔴"
-        status = "High Utilization"
-    
-    st.metric(
-        "Fleet Utilization",
-        f"{color} {status}",
-        f"{utilization_pct:.0f}% rented ({available_vehicles} available)"
-    )
+# Utilization indicator
+if utilization_pct < 30:
+    util_color, util_status = "🟢", "Low"
+elif utilization_pct < 70:
+    util_color, util_status = "🟡", "Medium"
+else:
+    util_color, util_status = "🔴", "High"
 
-st.markdown("---")
+st.sidebar.metric("Utilization", f"{util_color} {utilization_pct:.0f}%", f"{available_vehicles} available")
+
+# =====================================================
+# MAIN CONTENT - Header
+# =====================================================
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("Gemini_Generated_Image_qzl79lqzl79lqzl7.png", use_column_width=True)
+    st.markdown('<p class="main-header">Intelligent Dynamic Pricing</p>', unsafe_allow_html=True)
+    st.info(f"👋 **{user_role}** | **{branch_info['name']}** | {pricing_date.strftime('%Y-%m-%d')} | {util_color} {utilization_pct:.0f}% Utilization")
 
 # Main pricing section
 st.markdown("## 💰 Recommended Pricing by Vehicle Category")
