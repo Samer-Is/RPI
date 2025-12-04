@@ -1,28 +1,81 @@
 """
 Real-time Fleet Utilization Query
 
-Queries Fleet.VehicleHistory to calculate current utilization by branch.
+Loads Fleet.VehicleHistory from LOCAL FILE or database.
+For production deployment, use local CSV file to avoid database connection.
 """
 
 import pandas as pd
-import pyodbc
 from datetime import datetime, timedelta
 import logging
-import config
+from pathlib import Path
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Local data file path
+LOCAL_VEHICLE_HISTORY_FILE = Path('data/vehicle_history_local.csv')
+
+# Try to import database dependencies (optional)
+try:
+    import pyodbc
+    import config
+    DB_AVAILABLE = True
+except ImportError:
+    DB_AVAILABLE = False
+    logger.info("Database modules not available - using local data only")
+
+
+def get_utilization_from_local_file(branch_id: int = None) -> dict:
+    """
+    Load utilization from local CSV file (NO database connection needed).
+    
+    Expected CSV columns: BranchId, total_vehicles, rented_vehicles, available_vehicles
+    """
+    try:
+        if not LOCAL_VEHICLE_HISTORY_FILE.exists():
+            logger.warning(f"Local file not found: {LOCAL_VEHICLE_HISTORY_FILE}")
+            return None
+        
+        df = pd.read_csv(LOCAL_VEHICLE_HISTORY_FILE)
+        
+        if branch_id:
+            branch_data = df[df['BranchId'] == branch_id]
+            if len(branch_data) == 0:
+                logger.warning(f"No data for branch {branch_id} in local file")
+                return None
+            
+            row = branch_data.iloc[0]
+            total = int(row['total_vehicles'])
+            rented = int(row['rented_vehicles'])
+            available = int(row['available_vehicles'])
+            utilization_pct = (rented / total * 100) if total > 0 else 0
+            
+            logger.info(f"✓ Local data: Branch {branch_id} = {utilization_pct:.1f}% ({rented}/{total})")
+            
+            return {
+                'total_vehicles': total,
+                'rented_vehicles': rented,
+                'available_vehicles': available,
+                'utilization_pct': round(utilization_pct, 1),
+                'source': 'local_file'
+            }
+        else:
+            # Return all branches
+            return df.to_dict('records')
+            
+    except Exception as e:
+        logger.error(f"Error reading local file: {e}")
+        return None
+
 
 def get_current_utilization(branch_id: int = None, date = None) -> dict:
     """
-    Query Fleet.VehicleHistory to get current utilization.
+    Get current utilization - tries LOCAL FILE first, then database.
     
-    Logic:
-    - Count vehicles by status at target date
-    - Rented = StatusId in (2, 3, 4) (On rent, Reserved, etc.)
-    - Available = StatusId = 1 (Available)
-    - Total = All vehicles in branch
+    For production: Use local CSV file (no database needed)
+    For development: Can fallback to database
     
     Args:
         branch_id: Branch ID (optional, if None returns all branches)
@@ -33,6 +86,22 @@ def get_current_utilization(branch_id: int = None, date = None) -> dict:
     """
     if date is None:
         date = datetime.now()
+    
+    # FIRST: Try local file (for production - no DB needed)
+    local_result = get_utilization_from_local_file(branch_id)
+    if local_result is not None:
+        return local_result
+    
+    # FALLBACK: Try database if available
+    if not DB_AVAILABLE:
+        logger.warning(f"No local data and no database - using defaults for branch {branch_id}")
+        return {
+            'total_vehicles': 100,
+            'rented_vehicles': 50,
+            'available_vehicles': 50,
+            'utilization_pct': 50.0,
+            'source': 'default'
+        }
     
     # Convert datetime.date to datetime if needed (for SQL query compatibility)
     if hasattr(date, 'hour'):  # It's already a datetime

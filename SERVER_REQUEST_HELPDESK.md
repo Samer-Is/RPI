@@ -13,93 +13,40 @@
 
 ## Purpose
 
-Deploy a **production** internal web-based dashboard for dynamic pricing recommendations. The application will:
-- Connect to the **Renty Production SQL Server database** (read-only)
-- Display real-time pricing recommendations to branch managers
-- Fetch competitor pricing data from external API
-- Run 24/7 for business operations
+Deploy a **production** internal web-based dashboard for dynamic pricing recommendations.
+
+**Note:** This is a **standalone application** - NO database connection required. All data is stored locally on the server.
 
 ---
 
 ## Server Requirements
 
-### Option A: Windows Server (Recommended)
+### Recommended Specs
 
-| Specification | Minimum | Recommended |
-|---------------|---------|-------------|
-| **OS** | Windows Server 2019+ | Windows Server 2022 |
-| **CPU** | 2 vCPU | 4 vCPU |
-| **RAM** | 4 GB | 8 GB |
-| **Storage** | 50 GB SSD | 100 GB SSD |
-| **Network** | Internal + Internet | Internal + Internet |
-
-### Option B: Linux Server
-
-| Specification | Minimum | Recommended |
-|---------------|---------|-------------|
-| **OS** | Ubuntu 22.04 LTS | Ubuntu 22.04 LTS |
-| **CPU** | 2 vCPU | 4 vCPU |
-| **RAM** | 4 GB | 8 GB |
-| **Storage** | 50 GB SSD | 100 GB SSD |
-| **Network** | Internal + Internet | Internal + Internet |
+| Specification | Requirement |
+|---------------|-------------|
+| **OS** | Windows Server 2022 or Ubuntu 22.04 LTS |
+| **CPU** | 4 vCPU |
+| **RAM** | 8 GB |
+| **Storage** | 100 GB SSD |
 
 ---
 
 ## Network Requirements
 
-### Inbound Access (Required)
+### Inbound Access
 | Port | Protocol | Source | Purpose |
 |------|----------|--------|---------|
 | 8501 | TCP | Internal Network | Dashboard web access |
-| 22 | TCP | IT Admin IPs only | SSH (Linux) / RDP (Windows) |
+| 3389/22 | TCP | IT Admin IPs only | RDP (Windows) / SSH (Linux) |
 
-### Outbound Access (Required)
+### Outbound Access
 | Destination | Port | Purpose |
 |-------------|------|---------|
-| **Renty Production SQL Server** | 1433 | Database queries (read-only) |
 | rapidapi.com | 443 (HTTPS) | Competitor pricing API |
-| pypi.org | 443 (HTTPS) | Python package installation (one-time setup) |
+| pypi.org | 443 (HTTPS) | Python packages (one-time setup) |
 
----
-
-## Production Requirements
-
-### High Availability
-- [ ] Auto-restart on server reboot
-- [ ] Service monitoring (optional)
-- [ ] Daily backup of application files
-
-### Security
-- [ ] Firewall rules as specified above
-- [ ] Database service account with minimal permissions
-- [ ] HTTPS/SSL certificate (optional, for secure access)
-
----
-
-## Database Access Required (PRODUCTION)
-
-**Connection Type:** Read-only access to **Renty Production SQL Server**
-
-**Server:** [Production SQL Server Name/IP]  
-**Database:** [Production Database Name]  
-**Port:** 1433  
-
-**Tables Needed (SELECT Only):**
-| Schema | Table | Purpose |
-|--------|-------|---------|
-| `Fleet` | `VehicleHistory` | Real-time vehicle utilization |
-| `Fleet` | `Vehicles` | Vehicle master data |
-| `Fleet` | `Models` | Vehicle categories |
-| `Rental` | `Contract` | Rental history & pricing |
-| `Rental` | `Branches` | Branch information |
-| `Rental` | `Cities` | City reference |
-
-**Service Account Request:**
-- Create a dedicated **production service account** for the application
-- Account name suggestion: `svc_dynamic_pricing`
-- Grant **SELECT permissions only** (no INSERT/UPDATE/DELETE)
-- Restrict access to tables listed above
-- Enable Windows Authentication or SQL Authentication
+**⚠️ NO SQL Server connection required**
 
 ---
 
@@ -109,45 +56,32 @@ Deploy a **production** internal web-based dashboard for dynamic pricing recomme
 |----------|---------|---------|
 | Python | 3.11+ | Application runtime |
 | pip | Latest | Package manager |
-| ODBC Driver | SQL Server 17+ | Database connectivity |
 | Git | Latest | Code deployment |
 
-**Python Packages (installed via pip):**
-```
-streamlit==1.28.0
-pandas==2.1.0
-numpy==1.24.0
-xgboost==2.0.0
-scikit-learn==1.3.0
-pyodbc==5.0.0
-plotly==5.18.0
-requests==2.31.0
-```
+---
+
+## Data Storage (Local Files)
+
+All data will be stored locally on the server:
+
+| File | Purpose | Update Method |
+|------|---------|---------------|
+| `vehicle_history.csv` | Fleet utilization data | Manual upload / scheduled export |
+| `competitor_prices.json` | Competitor pricing | Auto-updated via API |
+| `demand_model.pkl` | ML model | Pre-trained, static |
+
+**No live database connection needed.**
 
 ---
 
 ## Access Requirements
 
-### Users Who Need Dashboard Access
-- Branch Managers (view pricing recommendations)
-- Pricing Team (view and analyze)
-- [Add specific users/groups]
+### Dashboard Users
+- Branch Managers (internal network access to port 8501)
 
 ### Admin Access
 - [Your Name] — Application deployment and maintenance
 - IT Support — Server administration
-
----
-
-## Deployment Plan
-
-1. **Server provisioning** — IT creates VM with specifications above
-2. **Network configuration** — Open required ports
-3. **Database access** — DBA creates read-only service account
-4. **Software installation** — Install Python and dependencies
-5. **Application deployment** — Deploy code and configure
-6. **Testing** — Verify connectivity and functionality
-7. **Go-live** — Share dashboard URL with users
 
 ---
 
@@ -157,42 +91,24 @@ requests==2.31.0
 http://[SERVER-IP]:8501
 ```
 
-Or with custom DNS:
-```
-http://pricing.renty.local:8501
-```
+---
+
+## Simple Email Version
+
+> **Subject:** VM Request - RENTY Dynamic Pricing Dashboard
+>
+> Hi Team,
+>
+> I need a VM for an internal web dashboard:
+>
+> **Server:** 4 vCPU, 8GB RAM, 100GB SSD, Windows Server 2022  
+> **Network:** Port 8501 open internally, outbound internet (HTTPS only)  
+> **Software:** Python 3.11  
+>
+> **No database connection required** - all data stored locally.
+>
+> Thanks!
 
 ---
 
-## Support & Maintenance
-
-| Activity | Frequency | Responsible |
-|----------|-----------|-------------|
-| Server patching | Monthly | IT |
-| Application updates | As needed | [Your Name] |
-| Database access review | Quarterly | DBA |
-| Backup | Daily (server) | IT |
-
----
-
-## Contact for Questions
-
-**Technical Contact:** [Your Name]  
-**Email:** [Your Email]  
-**Phone:** [Your Phone]  
-
----
-
-## Approval
-
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| Requestor | | | |
-| Manager | | | |
-| IT Approval | | | |
-| DBA Approval | | | |
-
----
-
-*Please contact me if you need any additional technical details or clarification.*
-
+**Contact:** [Your Name] - [Your Email]
