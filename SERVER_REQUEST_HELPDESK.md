@@ -3,19 +3,21 @@
 ## Request Summary
 
 **Project:** RENTY Dynamic Pricing Dashboard  
+**Environment:** 🔴 **PRODUCTION**  
 **Requested By:** [Your Name]  
 **Department:** [Your Department]  
 **Date:** [Date]  
-**Priority:** Medium  
+**Priority:** High  
 
 ---
 
 ## Purpose
 
-Deploy an internal web-based dashboard for dynamic pricing recommendations. The application will:
-- Connect to the existing Renty SQL Server database (read-only)
-- Display pricing recommendations to branch managers
+Deploy a **production** internal web-based dashboard for dynamic pricing recommendations. The application will:
+- Connect to the **Renty Production SQL Server database** (read-only)
+- Display real-time pricing recommendations to branch managers
 - Fetch competitor pricing data from external API
+- Run 24/7 for business operations
 
 ---
 
@@ -54,28 +56,50 @@ Deploy an internal web-based dashboard for dynamic pricing recommendations. The 
 ### Outbound Access (Required)
 | Destination | Port | Purpose |
 |-------------|------|---------|
-| Renty SQL Server | 1433 | Database queries (read-only) |
+| **Renty Production SQL Server** | 1433 | Database queries (read-only) |
 | rapidapi.com | 443 (HTTPS) | Competitor pricing API |
-| pypi.org | 443 (HTTPS) | Python package installation |
+| pypi.org | 443 (HTTPS) | Python package installation (one-time setup) |
 
 ---
 
-## Database Access Required
+## Production Requirements
 
-**Connection Type:** Read-only access to Renty production database
+### High Availability
+- [ ] Auto-restart on server reboot
+- [ ] Service monitoring (optional)
+- [ ] Daily backup of application files
 
-**Tables Needed (Read-Only):**
-- `Fleet.VehicleHistory` — Vehicle utilization data
-- `Fleet.Vehicles` — Vehicle master data
-- `Fleet.Models` — Vehicle categories
-- `Rental.Contract` — Rental history
-- `Rental.Branches` — Branch information
-- `Rental.Cities` — City reference
+### Security
+- [ ] Firewall rules as specified above
+- [ ] Database service account with minimal permissions
+- [ ] HTTPS/SSL certificate (optional, for secure access)
+
+---
+
+## Database Access Required (PRODUCTION)
+
+**Connection Type:** Read-only access to **Renty Production SQL Server**
+
+**Server:** [Production SQL Server Name/IP]  
+**Database:** [Production Database Name]  
+**Port:** 1433  
+
+**Tables Needed (SELECT Only):**
+| Schema | Table | Purpose |
+|--------|-------|---------|
+| `Fleet` | `VehicleHistory` | Real-time vehicle utilization |
+| `Fleet` | `Vehicles` | Vehicle master data |
+| `Fleet` | `Models` | Vehicle categories |
+| `Rental` | `Contract` | Rental history & pricing |
+| `Rental` | `Branches` | Branch information |
+| `Rental` | `Cities` | City reference |
 
 **Service Account Request:**
-- Create a dedicated service account for the application
-- Grant SELECT permissions only (no INSERT/UPDATE/DELETE)
-- Restrict to tables listed above
+- Create a dedicated **production service account** for the application
+- Account name suggestion: `svc_dynamic_pricing`
+- Grant **SELECT permissions only** (no INSERT/UPDATE/DELETE)
+- Restrict access to tables listed above
+- Enable Windows Authentication or SQL Authentication
 
 ---
 
