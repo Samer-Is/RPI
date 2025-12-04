@@ -263,7 +263,7 @@ else:
     if comp_df is not None:
         st.sidebar.write(f"comp_df length: {len(comp_df)}")
 
-st.sidebar.markdown(f"**Model Accuracy:** 96.57% (V4 Robust)")
+st.sidebar.markdown(f"**XGBOOST_MODEL_RUNNING_V4**")
 
 # Competitor data freshness
 data_freshness = get_data_freshness()
