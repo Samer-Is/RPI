@@ -529,36 +529,277 @@ ORDER BY m.CategoryName
 - ML model training data
 - Price trend analysis
 
-### **5. Training Data Generation**
+### **5. Rental.Branches Table**
+**Purpose:** Branch/location details
 
-**Combined Query for ML Training:**
+**Key Columns Used:**
+- `Id` - Branch identifier
+- `CityId` - Link to city
+- `CountryId` - Link to country
+- `Name` - Branch name
+- `IsAirport` - Airport location flag
+- `IsActive` - Whether branch is active
+
+**Used For:**
+- Branch filtering
+- Airport premium identification
+- Location context
+
+---
+
+### **6. Rental.Bookings Table**
+**Purpose:** Booking/reservation data (demand signals)
+
+**Key Columns Used:**
+- `BookingId` - Unique booking identifier
+- `BranchId` - Pickup branch
+- `CreationTime` - When booking was made
+- `StartDate` - Requested pickup date
+- `Status` - Booking status (Confirmed, Cancelled, etc.)
+
+**Used For:**
+- Demand forecasting (future bookings = demand signal)
+- Lead time analysis
+- Cancellation patterns
+
+---
+
+### **7. Rental.RentalRates Table**
+**Purpose:** Historical rate cards and pricing tiers
+
+**Key Columns Used:**
+- `RentalRateId` - Rate identifier
+- `CategoryId` - Vehicle category
+- `DailyRate` - Daily price
+- `WeeklyRate` - Weekly price
+- `MonthlyRate` - Monthly price
+- `EffectiveDate` - When rate became active
+
+**Used For:**
+- Base price reference
+- Historical pricing trends
+- Rate card updates
+
+---
+
+### **8. Rental.Cities Table**
+**Purpose:** City reference data
+
+**Key Columns Used:**
+- `CityId` - City identifier
+- `Name` - City name (Riyadh, Jeddah, etc.)
+- `CountryId` - Country reference
+
+**Used For:**
+- City-level pricing rules
+- Regional demand patterns
+- Mecca/Medina special pricing
+
+---
+
+### **9. Rental.Countries Table**
+**Purpose:** Country reference data
+
+**Key Columns Used:**
+- `CountryId` - Country identifier
+- `Name` - Country name
+- `CurrencyId` - Default currency
+
+**Used For:**
+- Multi-country support (future)
+- Currency handling
+
+---
+
+### **10. Training Data Generation**
+
+**Source Parquet File:** `data/processed/training_data.parquet`
+
+**Raw Training Data Columns (31 columns from database):**
+```
+Id, ContractNumber, CreationTime, Start, End, ActualDropOffDate, 
+StatusId, FinancialStatusId, VehicleId, PickupBranchId, DropoffBranchId, 
+CustomerId, DailyRateAmount, MonthlyRateAmount, CurrencyId, RentalRateId, 
+BookingId, TenantId, Discriminator, DayOfWeek, Month, Quarter, IsWeekend, 
+ContractDurationDays, Id_branch, CityId, CountryId, IsAirport, 
+Id_vehicle, ModelId, Year
+```
+
+**Combined Query for ML Training Data:**
 ```sql
 -- Generate training dataset with all features
+-- JOINS: Rental.Contract → Fleet.Vehicles → Rental.Branches
 SELECT 
-    c.ContractDate as Date,
-    c.BranchId,
+    -- Contract fields
+    c.Id,
+    c.ContractNumber,
+    c.CreationTime,
+    c.Start,
+    c.End,
+    c.ActualDropOffDate,
+    c.StatusId,
+    c.FinancialStatusId,
     c.VehicleId,
+    c.PickupBranchId,
+    c.DropoffBranchId,
+    c.CustomerId,
+    c.DailyRateAmount,
+    c.MonthlyRateAmount,
+    c.CurrencyId,
+    c.RentalRateId,
+    c.BookingId,
+    c.TenantId,
+    c.Discriminator,
+    
+    -- Derived temporal features
+    DATEPART(weekday, c.Start) as DayOfWeek,
+    DATEPART(month, c.Start) as Month,
+    DATEPART(quarter, c.Start) as Quarter,
+    CASE WHEN DATEPART(weekday, c.Start) IN (6, 7) THEN 1 ELSE 0 END as IsWeekend,
+    DATEDIFF(day, c.Start, c.End) as ContractDurationDays,
+    
+    -- Branch details (from JOIN)
+    b.Id as Id_branch,
+    b.CityId,
+    b.CountryId,
+    b.IsAirport,
+    
+    -- Vehicle details (from JOIN)
+    v.Id as Id_vehicle,
     v.ModelId,
-    m.CategoryName,
-    c.DailyPrice,
-    c.StartDate,
-    c.EndDate,
-    DATEDIFF(day, c.StartDate, c.EndDate) as RentalDuration,
-    DATEPART(weekday, c.StartDate) as DayOfWeek,
-    DATEPART(month, c.StartDate) as Month,
-    -- Count bookings per day for demand
-    COUNT(*) OVER (
-        PARTITION BY c.BranchId, CAST(c.StartDate AS DATE)
-    ) as DailyDemand
+    v.Year
+
 FROM Rental.Contract c
-INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.VehicleId
-INNER JOIN Fleet.Models m ON v.ModelId = m.ModelId
-WHERE c.ContractDate >= DATEADD(day, -180, GETDATE())
-  AND c.Status = 'Completed'
-ORDER BY c.ContractDate
+INNER JOIN Rental.Branches b ON c.PickupBranchId = b.Id
+INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.Id
+WHERE c.CreationTime >= DATEADD(day, -180, GETDATE())
+  AND c.StatusId = 'Completed'
+  AND c.DailyRateAmount > 0
+ORDER BY c.CreationTime
 ```
 
 **This generates 50,000+ training records across 180 days**
+
+---
+
+### **11. Complete Database Schema Diagram**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        DATA SOURCES                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   ┌──────────────────┐     ┌──────────────────┐                     │
+│   │ Fleet.Vehicles   │────►│ Fleet.Models     │                     │
+│   │ - VehicleId (PK) │     │ - ModelId (PK)   │                     │
+│   │ - ModelId (FK)   │     │ - CategoryName   │                     │
+│   │ - BranchId       │     │ - Brand          │                     │
+│   │ - IsActive       │     │ - Year           │                     │
+│   └────────┬─────────┘     └──────────────────┘                     │
+│            │                                                         │
+│            ▼                                                         │
+│   ┌──────────────────┐                                              │
+│   │ Fleet.           │                                              │
+│   │ VehicleHistory   │◄─── UTILIZATION SOURCE                       │
+│   │ - VehicleId (FK) │                                              │
+│   │ - BranchId       │                                              │
+│   │ - StatusId       │     Status Codes:                            │
+│   │ - OperationDate  │     140=Available, 141=Rented                │
+│   └──────────────────┘     144=Reserved, 154=Long-term              │
+│                                                                      │
+│   ┌──────────────────┐     ┌──────────────────┐                     │
+│   │ Rental.Contract  │────►│ Rental.Branches  │                     │
+│   │ - ContractId(PK) │     │ - Id (PK)        │                     │
+│   │ - VehicleId (FK) │     │ - CityId (FK)    │                     │
+│   │ - BranchId (FK)  │     │ - IsAirport      │                     │
+│   │ - DailyRateAmt   │     │ - Name           │                     │
+│   │ - Start/End Date │     └────────┬─────────┘                     │
+│   └──────────────────┘              │                               │
+│            │                        ▼                               │
+│            │              ┌──────────────────┐                      │
+│            │              │ Rental.Cities    │                      │
+│            │              │ - CityId (PK)    │                      │
+│            │              │ - Name           │                      │
+│            │              │ - CountryId (FK) │                      │
+│            │              └──────────────────┘                      │
+│            │                                                        │
+│            ▼                                                        │
+│   ┌──────────────────┐                                              │
+│   │ Rental.Bookings  │◄─── DEMAND SIGNALS                          │
+│   │ - BookingId (PK) │                                              │
+│   │ - BranchId (FK)  │                                              │
+│   │ - StartDate      │                                              │
+│   │ - Status         │                                              │
+│   └──────────────────┘                                              │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### **12. All Database JOINs Used**
+
+**JOIN 1: Training Data Generation**
+```sql
+Rental.Contract c
+  INNER JOIN Rental.Branches b ON c.PickupBranchId = b.Id
+  INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.Id
+```
+→ Creates 31-column training dataset
+
+**JOIN 2: Category-Based Pricing (Base Prices)**
+```sql
+Rental.Contract c
+  INNER JOIN Fleet.Vehicles v ON c.VehicleId = v.VehicleId
+  INNER JOIN Fleet.Models m ON v.ModelId = m.ModelId
+```
+→ Gets average prices per vehicle category
+
+**JOIN 3: Real-Time Utilization**
+```sql
+Fleet.VehicleHistory vh
+  -- No JOINs needed, self-contained
+  -- Uses window function: ROW_NUMBER() OVER (PARTITION BY VehicleId)
+```
+→ Gets latest status per vehicle
+
+**JOIN 4: Branch Details**
+```sql
+Rental.Branches b
+  INNER JOIN Rental.Cities c ON b.CityId = c.CityId
+  INNER JOIN Rental.Countries co ON c.CountryId = co.CountryId
+```
+→ Gets full location hierarchy
+
+---
+
+### **13. External Data Sources (Not from Database)**
+
+| Source | Data | How Used |
+|--------|------|----------|
+| **Saudi Calendar API** | Ramadan dates, Hajj dates, Umrah season | Event multipliers |
+| **School Calendar** | School vacation dates | Event features |
+| **Holiday List** | National Day, Eid, etc. | Holiday multipliers |
+| **Booking.com API** | Competitor car prices | Price comparison |
+| **Manual Events** | Conferences, sports events | Event features |
+
+**Event Data File:** `data/external/ksa_events.json`
+```json
+{
+  "2025": {
+    "ramadan_start": "2025-02-28",
+    "ramadan_end": "2025-03-29",
+    "eid_fitr": ["2025-03-30", "2025-04-02"],
+    "eid_adha": ["2025-06-06", "2025-06-10"],
+    "hajj_season": ["2025-06-01", "2025-06-15"],
+    "national_day": "2025-09-23",
+    "school_holidays": [
+      {"start": "2025-01-16", "end": "2025-02-02"},
+      {"start": "2025-06-15", "end": "2025-09-01"}
+    ]
+  }
+}
+```
 
 ---
 
@@ -596,66 +837,111 @@ XGBRegressor(
 - RMSE: 1.2 bookings (very low error)
 - MAPE: 8.3% (mean absolute percentage error)
 
-### **2. Feature Engineering (52 Features)**
+### **2. Feature Engineering (52 Features - ACTUAL)**
 
-**Temporal Features (15):**
-- Day of week (1-7)
-- Day of month (1-31)
-- Month (1-12)
-- Week of year (1-52)
-- Is weekend (Friday/Saturday)
-- Hour of day
-- Day of year
-- Quarter
-- Is month start/end
-- Fourier features (seasonality - 6 components)
+**The ML model uses exactly 52 features. Here is the complete list:**
 
-**Location Features (5):**
-- Branch ID
-- City ID
-- Is airport (True/False)
-- Branch size category
-- Regional demand index
+```python
+FEATURE_COLUMNS = [
+    # Contract/Transaction Features (9)
+    'StatusId',              # Contract status
+    'FinancialStatusId',     # Payment status
+    'VehicleId',             # Vehicle identifier
+    'PickupBranchId',        # Pickup location
+    'DropoffBranchId',       # Dropoff location
+    'DailyRateAmount',       # Target variable (price)
+    'CurrencyId',            # Currency
+    'RentalRateId',          # Rate card reference
+    'BookingId',             # Booking reference
+    
+    # Temporal Features (12)
+    'DayOfWeek',             # 0-6 (Monday-Sunday)
+    'Month',                 # 1-12
+    'Quarter',               # 1-4
+    'IsWeekend',             # 0/1 (Fri-Sat in KSA)
+    'ContractDurationDays',  # Rental length
+    'DayOfMonth',            # 1-31
+    'WeekOfYear',            # 1-52
+    'DayOfYear',             # 1-365
+    'sin_365_1',             # Yearly seasonality (Fourier)
+    'cos_365_1',             # Yearly seasonality (Fourier)
+    'sin_365_2',             # Yearly seasonality (Fourier)
+    'cos_365_2',             # Yearly seasonality (Fourier)
+    
+    # Weekly Seasonality (4)
+    'sin_7_1',               # Weekly pattern (Fourier)
+    'cos_7_1',               # Weekly pattern (Fourier)
+    'sin_7_2',               # Weekly pattern (Fourier)
+    'cos_7_2',               # Weekly pattern (Fourier)
+    
+    # Location Features (6)
+    'CityId',                # City identifier
+    'CountryId',             # Country (KSA=1)
+    'IsAirport',             # Airport branch flag
+    'IsAirportBranch',       # Duplicate for compatibility
+    'CitySize',              # City population proxy
+    'BranchHistoricalSize',  # Historical demand at branch
+    
+    # Vehicle Features (2)
+    'ModelId',               # Vehicle model
+    'Year',                  # Vehicle year
+    
+    # Event Features (12)
+    'is_holiday',            # National holiday flag
+    'holiday_duration',      # Length of holiday period
+    'is_school_vacation',    # School break flag
+    'is_ramadan',            # Ramadan period
+    'is_umrah_season',       # Umrah pilgrimage season
+    'umrah_season_intensity', # Intensity (0-1)
+    'is_major_event',        # Conferences, sports, etc.
+    'is_hajj',               # Hajj pilgrimage
+    'is_festival',           # Festivals (Eid, etc.)
+    'is_sports_event',       # Sports events
+    'days_to_holiday',       # Countdown to next holiday
+    'days_from_holiday',     # Days since last holiday
+    
+    # Derived Event Features (3)
+    'is_long_holiday',       # Holiday >= 4 days
+    'near_holiday',          # 1-2 days before holiday
+    'post_holiday',          # 1-2 days after holiday
+    
+    # Price/Capacity Features (4)
+    'FleetSize',             # Total fleet at branch
+    'BranchAvgPrice',        # Historical avg price
+    'CityAvgPrice',          # City avg price
+    'CapacityIndicator',     # Supply indicator
+]
+```
 
-**Event Features (12):**
-- Is holiday
-- Is school vacation
-- Is Ramadan
-- Is Umrah season
-- Is Hajj season
-- Is major event (festival/sports/conference)
-- Days to next holiday
-- Holiday duration
-- Event intensity score
-- Is pre-holiday (1-2 days before)
-- Is post-holiday (1-2 days after)
-- Weekend + holiday combination
+**Feature Categories Summary:**
 
-**Historical Features (10):**
-- Lag 1 day demand
-- Lag 7 day demand (same day last week)
-- Lag 14 day demand
-- Rolling 7-day average
-- Rolling 14-day average
-- Rolling 30-day average
-- Day-of-week average (historical)
-- Branch average demand
-- Category demand trend
-- Seasonal adjustment factor
+| Category | Count | Examples |
+|----------|-------|----------|
+| Contract/Transaction | 9 | VehicleId, DailyRateAmount, BookingId |
+| Temporal | 16 | DayOfWeek, Month, Fourier features |
+| Location | 6 | CityId, IsAirport, BranchHistoricalSize |
+| Vehicle | 2 | ModelId, Year |
+| Event | 15 | is_ramadan, is_hajj, days_to_holiday |
+| Price/Capacity | 4 | FleetSize, BranchAvgPrice |
+| **TOTAL** | **52** | |
 
-**Weather Features (5 - Future):**
-- Temperature
-- Precipitation
-- Sandstorm alerts
-- Holiday weather index
-- Tourism weather score
+**Fourier Features Explanation:**
+```python
+# Captures cyclical patterns without discontinuities
+t = (date - reference_date).days
 
-**Price Features (5):**
-- Current base price
-- Price change from last week
-- Competitor price index
-- Price elasticity estimate
-- Market position (premium/standard/budget)
+# Yearly seasonality (365-day cycle)
+sin_365_1 = sin(2π × t / 365)
+cos_365_1 = cos(2π × t / 365)
+sin_365_2 = sin(4π × t / 365)  # Second harmonic
+cos_365_2 = cos(4π × t / 365)
+
+# Weekly seasonality (7-day cycle)
+sin_7_1 = sin(2π × t / 7)
+cos_7_1 = cos(2π × t / 7)
+sin_7_2 = sin(4π × t / 7)
+cos_7_2 = cos(4π × t / 7)
+```
 
 ---
 

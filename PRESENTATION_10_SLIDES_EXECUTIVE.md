@@ -283,3 +283,4 @@ Final Price = Base Price × Demand × Supply × Events
 
 
 
+
