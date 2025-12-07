@@ -22,6 +22,7 @@ import config
 from competitor_pricing import load_competitor_prices, calculate_average_competitor_price
 from stored_competitor_prices import get_competitor_prices_for_branch_category, get_data_freshness, clear_cache
 from utilization_query import get_current_utilization
+from daily_competitor_scraper import scrape_all_competitor_prices, save_to_file
 
 # Page configuration
 st.set_page_config(
@@ -280,16 +281,40 @@ if data_freshness['available']:
 else:
     st.sidebar.error("❌ No competitor data available. Run daily_competitor_scraper.py")
 
-# Refresh button to clear cache and reload fresh data
+# Refresh button to fetch fresh competitor prices from API
 if st.sidebar.button("🔄 Refresh Competitor Data"):
-    clear_cache()
-    st.session_state['refresh_message'] = True
+    with st.sidebar:
+        with st.spinner("Fetching fresh competitor prices from API..."):
+            try:
+                # Fetch new prices from Booking.com API
+                data = scrape_all_competitor_prices()
+                
+                # Save to file (use absolute path)
+                from pathlib import Path
+                save_path = Path(__file__).resolve().parent / "data" / "competitor_prices" / "daily_competitor_prices.json"
+                save_to_file(data, str(save_path))
+                
+                # Clear cache to force reload
+                clear_cache()
+                
+                st.session_state['refresh_message'] = "success"
+                st.session_state['refresh_count'] = sum(
+                    len(branch_data.get('categories', {})) 
+                    for branch_data in data.get('branches', {}).values()
+                )
+            except Exception as e:
+                st.session_state['refresh_message'] = f"error: {str(e)}"
     st.rerun()
 
 # Show refresh confirmation message
 if st.session_state.get('refresh_message'):
-    st.sidebar.success("✅ Competitor data cache cleared and reloaded!")
-    st.session_state['refresh_message'] = False
+    msg = st.session_state['refresh_message']
+    if msg == "success":
+        count = st.session_state.get('refresh_count', 0)
+        st.sidebar.success(f"✅ Fetched fresh competitor prices! ({count} categories updated)")
+    elif msg.startswith("error:"):
+        st.sidebar.error(f"❌ Failed to fetch prices: {msg[7:]}")
+    st.session_state['refresh_message'] = None
 
 st.sidebar.markdown("---")
 
