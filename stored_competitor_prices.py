@@ -6,12 +6,14 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, Optional
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Path to stored data file (using Booking.com data)
-DATA_FILE = "data/competitor_prices/daily_competitor_prices.json"
+# Path to stored data file - use absolute path relative to this script's location
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_FILE = SCRIPT_DIR / "data" / "competitor_prices" / "daily_competitor_prices.json"
 
 # Cache the loaded data in memory
 _cached_data = None
@@ -38,6 +40,10 @@ def load_stored_data(force_reload=False) -> Optional[Dict]:
         return _cached_data
     
     try:
+        if not DATA_FILE.exists():
+            logger.error(f"Competitor price file not found: {DATA_FILE}")
+            return None
+            
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             _cached_data = json.load(f)
             _cache_timestamp = datetime.now()
